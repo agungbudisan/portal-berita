@@ -64,13 +64,25 @@ class NewsController extends Controller
     public function byCategory(Category $category, Request $request)
     {
         $page = $request->input('page', 1);
-        $news = $this->newsApiService->getNewsByCategory($category->name, $page);
+        $pageSize = 12;
+        $newsData = $this->newsApiService->getNewsByCategory(strtolower($category->name), $page, $pageSize);
+
+        // Mendapatkan artikel lokal dengan kategori yang sama
+        $localArticles = Article::where('is_published', true)
+            ->where('category_id', $category->id)
+            ->whereNotNull('published_at')
+            ->with('category', 'author')
+            ->orderByDesc('published_at')
+            ->limit(6)
+            ->get();
 
         return view('news.category', [
             'category' => $category,
-            'news' => $news['articles'] ?? [],
+            'news' => $newsData['articles'] ?? [],
+            'totalResults' => $newsData['totalResults'] ?? 0,
             'page' => $page,
-            'totalResults' => $news['totalResults'] ?? 0
+            'pageSize' => $pageSize,
+            'localArticles' => $localArticles
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -82,11 +83,18 @@ class ArticleController extends Controller
     public function show(Article $article)
     {
         // For public view, only show published articles
-        if (!$article->is_published && !Auth::check() && Auth::user()->is_admin) {
+        if (!$article->is_published && !(Auth::check() && Auth::user()->is_admin)) {
             abort(404);
         }
 
-        return view('articles.show', compact('article'));
+        // Fetch comments for this article
+        $comments = Comment::where('news_source_url', route('articles.show', $article))
+            ->where('is_approved', true)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('articles.show', compact('article', 'comments'));
     }
 
     /**
