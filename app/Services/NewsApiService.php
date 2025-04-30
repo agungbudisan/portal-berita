@@ -30,13 +30,53 @@ class NewsApiService
                 ];
             }
 
-            // Make the request to the API
-            $response = Http::withHeaders([
-                'X-Api-Key' => $apiSource->api_key,
-            ])->get($apiSource->url, [
-                'country' => 'id', // For Indonesian news
-                'pageSize' => 20,
-            ]);
+            // Make the request to the API with correct parameters based on API source
+            $response = null;
+
+            switch ($apiSource->name) {
+                case 'News API':
+                    $response = Http::withHeaders([
+                        'X-Api-Key' => $apiSource->api_key,
+                    ])->get($apiSource->url, [
+                        'country' => 'us', // US news
+                        'pageSize' => 20,
+                    ]);
+                    break;
+
+                case 'Guardian API':
+                    $response = Http::get($apiSource->url, [
+                        'api-key' => $apiSource->api_key,
+                        'section' => 'world',
+                        'page-size' => 20,
+                    ]);
+                    break;
+
+                case 'News Data IO':
+                    $response = Http::get($apiSource->url, [
+                        'apikey' => $apiSource->api_key,
+                        'country' => 'us', // US news
+                        'language' => 'en', // English
+                        'size' => 20,
+                    ]);
+                    break;
+
+                case 'GNews':
+                    $response = Http::get($apiSource->url, [
+                        'apikey' => $apiSource->api_key,
+                        'category' => 'general',
+                        'lang' => 'en', // English language
+                        'country' => 'us', // US
+                        'max' => 20, // Limit to 20 news
+                    ]);
+                    break;
+
+                default:
+                    return [
+                        'success' => false,
+                        'message' => 'Unknown API source type.',
+                        'count' => 0
+                    ];
+            }
 
             // If the request failed
             if (!$response->successful()) {
@@ -50,41 +90,31 @@ class NewsApiService
             $data = $response->json();
             $count = 0;
 
-            // Process the articles
-            if (!empty($data['articles'])) {
-                foreach ($data['articles'] as $article) {
-                    // Skip if title or description is empty
-                    if (empty($article['title']) || empty($article['description'])) {
-                        continue;
+            // Process articles based on API source
+            switch ($apiSource->name) {
+                case 'News API':
+                    if (!empty($data['articles'])) {
+                        $count = $this->processNewsApiArticles($data['articles'], $apiSource);
                     }
+                    break;
 
-                    // Check if news already exists
-                    $exists = News::where('title', $article['title'])->exists();
-                    if ($exists) {
-                        continue;
+                case 'Guardian API':
+                    if (!empty($data['response']['results'])) {
+                        $count = $this->processGuardianArticles($data['response']['results'], $apiSource);
                     }
+                    break;
 
-                    // Get or create category
-                    $categoryName = $article['source']['name'] ?? 'Umum';
-                    $category = Category::firstOrCreate(
-                        ['slug' => Str::slug($categoryName)],
-                        ['name' => $categoryName]
-                    );
+                case 'News Data IO':
+                    if (!empty($data['results'])) {
+                        $count = $this->processNewsDataIoArticles($data['results'], $apiSource);
+                    }
+                    break;
 
-                    // Create new news
-                    News::create([
-                        'title' => $article['title'],
-                        'slug' => $this->generateUniqueSlug($article['title']),
-                        'content' => $article['description'] . "\n\n" . ($article['content'] ?? ''),
-                        'image' => $article['urlToImage'] ?? null,
-                        'source' => $article['source']['name'] ?? $apiSource->name,
-                        'api_id' => $article['url'] ?? null,
-                        'category_id' => $category->id,
-                        'published_at' => isset($article['publishedAt']) ? Carbon::parse($article['publishedAt']) : now(),
-                    ]);
-
-                    $count++;
-                }
+                case 'GNews':
+                    if (!empty($data['articles'])) {
+                        $count = $this->processGNewsArticles($data['articles'], $apiSource);
+                    }
+                    break;
             }
 
             // Update API source record
@@ -105,6 +135,208 @@ class NewsApiService
                 'count' => 0
             ];
         }
+    }
+
+    /**
+     * Process articles from News API
+     *
+     * @param array $articles
+     * @param ApiSource $apiSource
+     * @return int
+     */
+    private function processNewsApiArticles(array $articles, ApiSource $apiSource): int
+    {
+        $count = 0;
+
+        foreach ($articles as $article) {
+            // Skip if title or description is empty
+            if (empty($article['title']) || empty($article['description'])) {
+                continue;
+            }
+
+            // Check if news already exists
+            $exists = News::where('title', $article['title'])->exists();
+            if ($exists) {
+                continue;
+            }
+
+            // Get or create category
+            $categoryName = $article['source']['name'] ?? 'General';
+            $category = Category::firstOrCreate(
+                ['slug' => Str::slug($categoryName)],
+                ['name' => $categoryName]
+            );
+
+            // Create new news
+            News::create([
+                'title' => $article['title'],
+                'slug' => $this->generateUniqueSlug($article['title']),
+                'content' => $article['description'] . "\n\n" . ($article['content'] ?? ''),
+                'image' => $article['urlToImage'] ?? null,
+                'source' => $article['source']['name'] ?? $apiSource->name,
+                'api_id' => $article['url'] ?? null,
+                'category_id' => $category->id,
+                'published_at' => isset($article['publishedAt']) ? Carbon::parse($article['publishedAt']) : now(),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Process articles from Guardian API
+     *
+     * @param array $articles
+     * @param ApiSource $apiSource
+     * @return int
+     */
+    private function processGuardianArticles(array $articles, ApiSource $apiSource): int
+    {
+        $count = 0;
+
+        foreach ($articles as $article) {
+            // Skip if webTitle is empty
+            if (empty($article['webTitle'])) {
+                continue;
+            }
+
+            // Check if news already exists
+            $exists = News::where('title', $article['webTitle'])->exists();
+            if ($exists) {
+                continue;
+            }
+
+            // Get or create category
+            $categoryName = $article['sectionName'] ?? 'General';
+            $category = Category::firstOrCreate(
+                ['slug' => Str::slug($categoryName)],
+                ['name' => $categoryName]
+            );
+
+            // Create new news
+            News::create([
+                'title' => $article['webTitle'],
+                'slug' => $this->generateUniqueSlug($article['webTitle']),
+                'content' => $article['webTitle'] . "\n\n" . "Read more at: " . ($article['webUrl'] ?? ''),
+                'image' => null, // Guardian API doesn't provide image in the basic response
+                'source' => 'The Guardian',
+                'api_id' => $article['id'] ?? null,
+                'category_id' => $category->id,
+                'published_at' => isset($article['webPublicationDate']) ? Carbon::parse($article['webPublicationDate']) : now(),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Process articles from News Data IO
+     *
+     * @param array $articles
+     * @param ApiSource $apiSource
+     * @return int
+     */
+    private function processNewsDataIoArticles(array $articles, ApiSource $apiSource): int
+    {
+        $count = 0;
+
+        foreach ($articles as $article) {
+            // Skip if title or description is empty
+            if (empty($article['title']) || empty($article['description'])) {
+                continue;
+            }
+
+            // Check if news already exists
+            $exists = News::where('title', $article['title'])->exists();
+            if ($exists) {
+                continue;
+            }
+
+            // Get or create category
+            $categoryName = 'General';
+            if (!empty($article['category'])) {
+                // News Data IO returns category as an array
+                if (is_array($article['category']) && !empty($article['category'])) {
+                    $categoryName = $article['category'][0] ?? 'General';
+                } else {
+                    $categoryName = $article['category'] ?? 'General';
+                }
+            }
+
+            $category = Category::firstOrCreate(
+                ['slug' => Str::slug($categoryName)],
+                ['name' => $categoryName]
+            );
+
+            // Create new news
+            News::create([
+                'title' => $article['title'],
+                'slug' => $this->generateUniqueSlug($article['title']),
+                'content' => $article['description'] . "\n\n" . ($article['content'] ?? ''),
+                'image' => $article['image_url'] ?? null, // News Data IO uses image_url
+                'source' => $article['source_id'] ?? $apiSource->name,
+                'api_id' => $article['article_id'] ?? null,
+                'category_id' => $category->id,
+                'published_at' => isset($article['pubDate']) ? Carbon::parse($article['pubDate']) : now(),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Process articles from GNews
+     *
+     * @param array $articles
+     * @param ApiSource $apiSource
+     * @return int
+     */
+    private function processGNewsArticles(array $articles, ApiSource $apiSource): int
+    {
+        $count = 0;
+
+        foreach ($articles as $article) {
+            // Skip if title or description is empty
+            if (empty($article['title']) || empty($article['description'])) {
+                continue;
+            }
+
+            // Check if news already exists
+            $exists = News::where('title', $article['title'])->exists();
+            if ($exists) {
+                continue;
+            }
+
+            // Get or create category
+            // GNews provides sources object with name
+            $categoryName = $article['source']['name'] ?? 'General';
+            $category = Category::firstOrCreate(
+                ['slug' => Str::slug($categoryName)],
+                ['name' => $categoryName]
+            );
+
+            // Create new news
+            News::create([
+                'title' => $article['title'],
+                'slug' => $this->generateUniqueSlug($article['title']),
+                'content' => $article['description'] . "\n\n" . ($article['content'] ?? ''),
+                'image' => $article['image'] ?? null, // GNews uses 'image' field
+                'source' => $article['source']['name'] ?? $apiSource->name,
+                'api_id' => $article['url'] ?? null,
+                'category_id' => $category->id,
+                'published_at' => isset($article['publishedAt']) ? Carbon::parse($article['publishedAt']) : now(),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
     }
 
     /**
