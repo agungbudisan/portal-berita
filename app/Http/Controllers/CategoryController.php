@@ -3,27 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Repositories\NewsRepository;
+use App\Repositories\CategoryRepository;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    protected $newsRepository;
+    protected $categoryRepository;
+
+    public function __construct(NewsRepository $newsRepository, CategoryRepository $categoryRepository)
+    {
+        $this->newsRepository = $newsRepository;
+        $this->categoryRepository = $categoryRepository;
+    }
+
     public function show(Category $category)
     {
-        $news = $category->news()
-            ->latest('published_at')
-            ->paginate(10);
-
-        $popularInCategory = $category->news()
-            ->withCount('comments')
-            ->orderBy('comments_count', 'desc')
-            ->take(3)
-            ->get();
-
-        $otherCategories = Category::where('id', '!=', $category->id)
-            ->withCount('news')
-            ->orderBy('news_count', 'desc')
-            ->take(4)
-            ->get();
+        $news = $this->newsRepository->getNewsByCategory($category, 10);
+        $popularInCategory = $this->newsRepository->getPopularNewsByCategory($category, 3);
+        $otherCategories = $this->categoryRepository->getExcept($category, 4);
 
         return view('category.show', compact(
             'category',

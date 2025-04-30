@@ -7,16 +7,24 @@ use App\Models\News;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\ApiSource;
+use App\Repositories\NewsRepository;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    protected $newsRepository;
+
+    public function __construct(NewsRepository $newsRepository)
+    {
+        $this->newsRepository = $newsRepository;
+    }
+
     public function index()
     {
         $newsCount = News::count();
         $userCount = User::where('role', 'user')->count();
         $commentCount = Comment::count();
-        $todayNewsCount = News::whereDate('created_at', today())->count();
+        $todayNewsCount = $this->newsRepository->getTodayNewsCount();
 
         $apiSources = ApiSource::all();
 
