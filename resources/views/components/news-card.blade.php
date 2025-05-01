@@ -11,22 +11,26 @@
         <div class="d-flex justify-content-between align-items-center">
             <small class="text-muted">{{ $news->published_at->diffForHumans() }}</small>
             @auth
-                @if($news->isBookmarkedByUser(auth()->user()))
-                    <form action="{{ route('bookmark.destroy', $news) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bookmark-btn" title="Hapus dari bookmark">
-                            <i class="bi bi-bookmark-fill"></i>
-                        </button>
-                    </form>
-                @else
-                    <form action="{{ route('bookmark.store', $news) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="bookmark-btn" title="Simpan ke bookmark">
-                            <i class="bi bi-bookmark"></i>
-                        </button>
-                    </form>
-                @endif
+                <div x-data="{ isBookmarked: {{ $news->isBookmarkedByUser(auth()->user()) ? 'true' : 'false' }} }">
+                    <button type="button"
+                            class="bookmark-btn"
+                            @click="
+                                $dispatch('bookmark-toggle');
+                                isBookmarked = !isBookmarked;
+                                fetch('{{ $news->isBookmarkedByUser(auth()->user())
+                                    ? route('bookmark.destroy', $news)
+                                    : route('bookmark.store', $news) }}', {
+                                    method: isBookmarked ? 'POST' : 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                });
+                            "
+                            x-bind:title="isBookmarked ? 'Hapus dari bookmark' : 'Simpan ke bookmark'">
+                        <i class="bi" x-bind:class="isBookmarked ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+                    </button>
+                </div>
             @endauth
         </div>
     </div>

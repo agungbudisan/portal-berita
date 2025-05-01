@@ -45,29 +45,48 @@
         </div>
 
         @if($recentBookmarks->isNotEmpty())
-            <div class="list-group mb-3">
-                @foreach($recentBookmarks as $bookmark)
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">
-                            <a href="{{ route('news.show', $bookmark->news) }}" class="text-decoration-none text-dark">
-                                {{ $bookmark->news->title }}
-                            </a>
-                        </h6>
-                        <small class="text-muted">{{ $bookmark->created_at->diffForHumans() }}</small>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-primary">{{ $bookmark->news->category->name }}</span>
-                        <form action="{{ route('bookmark.destroy', $bookmark->news) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm text-danger" title="Hapus bookmark">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                    </div>
+            <div x-data="{ bookmarks: [] }" x-init="
+                bookmarks = {{ json_encode($recentBookmarks->map(function($bookmark) {
+                    return [
+                        'id' => $bookmark->id,
+                        'news_id' => $bookmark->news_id,
+                        'title' => $bookmark->news->title,
+                        'category' => $bookmark->news->category->name,
+                        'url' => route('news.show', $bookmark->news),
+                        'created_at' => $bookmark->created_at->diffForHumans(),
+                        'delete_url' => route('bookmark.destroy', $bookmark->news)
+                    ];
+                })) }}
+            ">
+                <div class="list-group mb-3">
+                    <template x-for="bookmark in bookmarks" :key="bookmark.id">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <a :href="bookmark.url" class="text-decoration-none text-dark" x-text="bookmark.title"></a>
+                                </h6>
+                                <small class="text-muted" x-text="bookmark.created_at"></small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary" x-text="bookmark.category"></span>
+                                <button @click="
+                                    fetch(bookmark.delete_url, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        }
+                                    })
+                                    .then(() => {
+                                        bookmarks = bookmarks.filter(b => b.id !== bookmark.id);
+                                    })
+                                " class="btn btn-sm text-danger" title="Hapus bookmark">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
-                @endforeach
             </div>
         @else
             <div class="alert alert-info">
@@ -86,39 +105,99 @@
         </div>
 
         @if($recentComments->isNotEmpty())
-            <div class="mb-3">
-                @foreach($recentComments as $comment)
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">
-                                Pada:
-                                <a href="{{ route('news.show', $comment->news) }}" class="text-decoration-none">
-                                    {{ $comment->news->title }}
-                                </a>
-                            </small>
-                            <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
-                        </div>
-                        <p class="card-text mt-2">{{ $comment->content }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge {{ $comment->status === 'approved' ? 'bg-success' : 'bg-warning text-dark' }}">
-                                {{ $comment->status === 'approved' ? 'Disetujui' : 'Menunggu Persetujuan' }}
-                            </span>
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary me-2"
-                                        onclick="editComment('{{ $comment->id }}', '{{ addslashes($comment->content) }}')">
-                                    Edit
-                                </button>
-                                <form action="{{ route('comment.destroy', $comment) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
-                                </form>
+            <div x-data="{ comments: [] }" x-init="
+                comments = {{ json_encode($recentComments->map(function($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'content' => $comment->content,
+                        'news_title' => $comment->news->title,
+                        'news_url' => route('news.show', $comment->news),
+                        'created_at' => $comment->created_at->diffForHumans(),
+                        'status' => $comment->status,
+                        'edit_url' => route('comment.update', $comment),
+                        'delete_url' => route('comment.destroy', $comment)
+                    ];
+                })) }}
+            ">
+                <div class="mb-3">
+                    <template x-for="comment in comments" :key="comment.id">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between" x-data="{ showEdit: false, editContent: comment.content, submitting: false }">
+                                    <small class="text-muted">
+                                        Pada:
+                                        <a :href="comment.news_url" class="text-decoration-none" x-text="comment.news_title"></a>
+                                    </small>
+                                    <small class="text-muted" x-text="comment.created_at"></small>
+                                </div>
+                                <template x-if="!showEdit">
+                                    <p class="card-text mt-2" x-text="comment.content"></p>
+                                </template>
+                                <template x-if="showEdit">
+                                    <div class="mt-2">
+                                        <textarea class="form-control" x-model="editContent" rows="3"></textarea>
+                                    </div>
+                                </template>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="badge"
+                                          :class="comment.status === 'approved' ? 'bg-success' : 'bg-warning text-dark'"
+                                          x-text="comment.status === 'approved' ? 'Disetujui' : 'Menunggu Persetujuan'"></span>
+                                    <div x-data="{ showEdit: false }">
+                                        <template x-if="!showEdit">
+                                            <div>
+                                                <button @click="showEdit = true" class="btn btn-sm btn-outline-primary me-2">Edit</button>
+                                                <button @click="
+                                                    if (confirm('Yakin ingin menghapus komentar ini?')) {
+                                                        fetch(comment.delete_url, {
+                                                            method: 'DELETE',
+                                                            headers: {
+                                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                            }
+                                                        })
+                                                        .then(() => {
+                                                            comments = comments.filter(c => c.id !== comment.id);
+                                                        });
+                                                    }
+                                                " class="btn btn-sm btn-outline-danger">Hapus</button>
+                                            </div>
+                                        </template>
+                                        <template x-if="showEdit">
+                                            <div>
+                                                <button @click="
+                                                    submitting = true;
+                                                    fetch(comment.edit_url, {
+                                                        method: 'PUT',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                        },
+                                                        body: JSON.stringify({ content: editContent })
+                                                    })
+                                                    .then(response => {
+                                                        if (response.ok) {
+                                                            comment.content = editContent;
+                                                            comment.status = 'pending';
+                                                            showEdit = false;
+                                                        }
+                                                    })
+                                                    .finally(() => {
+                                                        submitting = false;
+                                                    });
+                                                " class="btn btn-sm btn-primary me-2" :disabled="submitting">
+                                                    <span x-show="submitting">
+                                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                    <span x-show="!submitting">Simpan</span>
+                                                </button>
+                                                <button @click="showEdit = false" class="btn btn-sm btn-secondary">Batal</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
-                @endforeach
             </div>
         @else
             <div class="alert alert-info">
@@ -127,39 +206,4 @@
         @endif
     </div>
 </div>
-
-<!-- Modal for editing comment -->
-<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editCommentModalLabel">Edit Komentar</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editCommentForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit-content" class="form-label">Komentar</label>
-                        <textarea class="form-control" id="edit-content" name="content" rows="3" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    function editComment(id, content) {
-        document.getElementById('editCommentForm').action = "{{ url('comment') }}/" + id;
-        document.getElementById('edit-content').value = content.replace(/\\'/g, "'");
-        var modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
-        modal.show();
-    }
-</script>
 @endsection

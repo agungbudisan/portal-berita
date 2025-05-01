@@ -29,15 +29,7 @@
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                </li>
+                {{ $latestNews->links() }}
             </ul>
         </nav>
     </div>
@@ -47,12 +39,26 @@
         <!-- Search -->
         <div class="mb-4">
             <h5 class="wgt-title">Pencarian</h5>
-            <form action="{{ route('news.search') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" name="query" class="form-control" placeholder="Cari berita..." value="{{ request('query') }}">
-                    <button class="btn btn-primary" type="submit">Cari</button>
-                </div>
-            </form>
+            <div x-data="{ query: '' }">
+                <form action="{{ route('news.search') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text"
+                               name="query"
+                               x-model="query"
+                               class="form-control"
+                               placeholder="Cari berita..."
+                               value="{{ request('query') }}">
+                        <button class="btn btn-primary"
+                                type="submit"
+                                x-bind:disabled="query.length < 3">
+                            Cari
+                        </button>
+                    </div>
+                    <small x-show="query.length > 0 && query.length < 3" class="text-danger">
+                        Minimal 3 karakter
+                    </small>
+                </form>
+            </div>
         </div>
 
         <!-- Popular News -->

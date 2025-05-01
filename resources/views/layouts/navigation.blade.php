@@ -1,4 +1,4 @@
-<header class="bg-white shadow-sm">
+<header class="bg-white shadow-sm" x-bind:class="{ 'bg-dark': darkMode }">
     <div class="container">
         <div class="row align-items-center py-3">
             <div class="col-md-3">
@@ -20,11 +20,18 @@
                 </ul>
             </div>
             <div class="col-md-3 text-end">
+                <!-- Dark Mode Toggle -->
+                <button class="btn btn-sm me-2"
+                        x-on:click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
+                        x-bind:class="darkMode ? 'btn-light' : 'btn-dark'">
+                    <i class="bi" x-bind:class="darkMode ? 'bi-sun' : 'bi-moon'"></i>
+                </button>
+
                 @guest
                     <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary me-2">Login</a>
                     <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Register</a>
                 @else
-                    <div class="dropdown">
+                    <div class="dropdown d-inline-block">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ Auth::user()->name }}
                         </button>

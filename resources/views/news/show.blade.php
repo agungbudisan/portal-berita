@@ -27,28 +27,37 @@
                 </div>
                 <div>
                     @auth
-                        <div class="d-flex">
-                            @if($isBookmarked)
-                                <form action="{{ route('bookmark.destroy', $news) }}" method="POST" class="me-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-bookmark-fill"></i> Tersimpan
-                                    </button>
-                                </form>
-                            @else
-                                <form action="{{ route('bookmark.store', $news) }}" method="POST" class="me-2">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-bookmark"></i> Simpan
-                                    </button>
-                                </form>
-                            @endif
-                            <button class="btn btn-sm btn-outline-primary" onclick="shareNews()">
-                                <i class="bi bi-share"></i> Bagikan
+                        <div x-data="{ isBookmarked: {{ $isBookmarked ? 'true' : 'false' }} }">
+                            <button type="button"
+                                    class="btn btn-sm"
+                                    x-bind:class="isBookmarked ? 'btn-primary' : 'btn-outline-primary'"
+                                    @click="
+                                        isBookmarked = !isBookmarked;
+                                        fetch('{{ $isBookmarked ? route('bookmark.destroy', $news) : route('bookmark.store', $news) }}', {
+                                            method: isBookmarked ? 'POST' : 'DELETE',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            }
+                                        });
+                                    ">
+                                <i class="bi" x-bind:class="isBookmarked ? 'bi-bookmark-fill' : 'bi-bookmark'"></i>
+                                <span x-text="isBookmarked ? 'Tersimpan' : 'Simpan'"></span>
                             </button>
                         </div>
                     @endauth
+
+                    <button class="btn btn-sm btn-outline-primary" x-data @click="
+                        navigator.share ?
+                            navigator.share({
+                                title: '{{ $news->title }}',
+                                text: '{{ Str::limit(strip_tags($news->content), 100) }}',
+                                url: window.location.href
+                            }) :
+                            prompt('Copy link to share:', window.location.href)
+                    ">
+                        <i class="bi bi-share"></i> Bagikan
+                    </button>
                 </div>
             </div>
 
@@ -112,18 +121,65 @@
                     <a href="{{ route('register') }}" class="btn btn-sm btn-outline-primary">Register</a>
                 </div>
             @else
-                <form action="{{ route('comment.store', $news) }}" method="POST" class="mb-4">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="content" class="form-label">Tulis Komentar</label>
-                        <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Kirim Komentar</button>
-                </form>
+                <div x-data="{
+                    content: '',
+                    submitting: false,
+                    characterCount: 0,
+                    maxLength: 1000
+                }">
+                    <form @submit.prevent="
+                        submitting = true;
+                        fetch('{{ route('comment.store', $news) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ content: content })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                content = '';
+                                window.location.reload();
+                            }
+                        })
+                        .finally(() => {
+                            submitting = false;
+                        })
+                    ">
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Tulis Komentar</label>
+                            <textarea
+                                class="form-control"
+                                x-model="content"
+                                @input="characterCount = content.length"
+                                id="content"
+                                name="content"
+                                rows="3"
+                                required
+                                maxlength="1000"></textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span x-show="characterCount > 0" x-text="characterCount + ' / ' + maxLength"></span>
+                                <span x-show="characterCount >= maxLength" class="text-danger">Maksimal karakter tercapai</span>
+                            </div>
+                        </div>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            x-bind:disabled="submitting || content.length === 0 || content.length > maxLength">
+                            <span x-show="submitting">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Mengirim...
+                            </span>
+                            <span x-show="!submitting">Kirim Komentar</span>
+                        </button>
+                    </form>
+                </div>
             @endguest
 
             <!-- Comments List -->
-            <div class="mb-3">
+            <div class="mb-3 mt-4">
                 @foreach($news->approvedComments as $comment)
                 <div class="card mb-3">
                     <div class="card-body">
@@ -134,15 +190,72 @@
                         <p class="card-text">{{ $comment->content }}</p>
                         @auth
                             @if(auth()->id() === $comment->user_id)
-                            <div class="d-flex justify-content-end">
-                                <button class="btn btn-sm btn-outline-secondary me-2"
-                                        onclick="editComment('{{ $comment->id }}', '{{ addslashes($comment->content) }}')">
+                            <div x-data="{ showEditForm: false, editContent: '{{ addslashes($comment->content) }}', submitting: false }" class="d-flex justify-content-end">
+                                <button
+                                    class="btn btn-sm btn-outline-secondary me-2"
+                                    @click="showEditForm = true"
+                                    x-show="!showEditForm">
                                     Edit
                                 </button>
-                                <form action="{{ route('comment.destroy', $comment) }}" method="POST">
+
+                                <div x-show="showEditForm" class="w-100 mt-2">
+                                    <form @submit.prevent="
+                                        submitting = true;
+                                        fetch('{{ route('comment.update', $comment) }}', {
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                            body: JSON.stringify({ content: editContent })
+                                        })
+                                        .then(response => {
+                                            if (response.ok) {
+                                                window.location.reload();
+                                            }
+                                        })
+                                        .finally(() => {
+                                            submitting = false;
+                                        })
+                                    ">
+                                        <div class="mb-2">
+                                            <textarea class="form-control" x-model="editContent" rows="3" required></textarea>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-sm btn-secondary me-2" @click="showEditForm = false">Batal</button>
+                                            <button type="submit" class="btn btn-sm btn-primary" x-bind:disabled="submitting">
+                                                <span x-show="submitting">
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    Menyimpan...
+                                                </span>
+                                                <span x-show="!submitting">Simpan</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <form x-data="{ submitting: false }"
+                                      x-show="!showEditForm"
+                                      action="{{ route('comment.destroy', $comment) }}"
+                                      method="POST"
+                                      @submit.prevent="
+                                        submitting = true;
+                                        fetch('{{ route('comment.destroy', $comment) }}', {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                        .then(() => window.location.reload())
+                                      ">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" x-bind:disabled="submitting">
+                                        <span x-show="submitting">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        </span>
+                                        <span x-show="!submitting">Hapus</span>
+                                    </button>
                                 </form>
                             </div>
                             @endif
@@ -195,61 +308,39 @@
             <div class="card-body">
                 <h5 class="card-title">Berlangganan Newsletter</h5>
                 <p class="card-text">Dapatkan update berita terbaru langsung ke email Anda</p>
-                <div class="input-group">
-                    <input type="email" class="form-control" placeholder="Email Anda">
-                    <button class="btn btn-primary" type="button">Subscribe</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for editing comment -->
-<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editCommentModalLabel">Edit Komentar</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editCommentForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit-content" class="form-label">Komentar</label>
-                        <textarea class="form-control" id="edit-content" name="content" rows="3" required></textarea>
+                <div x-data="{ email: '', submitted: false, valid: false }">
+                    <div class="input-group">
+                        <input
+                            type="email"
+                            class="form-control"
+                            placeholder="Email Anda"
+                            x-model="email"
+                            @input="valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)">
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                            x-bind:disabled="!valid || submitted"
+                            @click="
+                                submitted = true;
+                                setTimeout(() => {
+                                    alert('Terima kasih telah berlangganan newsletter kami!');
+                                    email = '';
+                                    submitted = false;
+                                }, 1000);
+                            ">
+                            <span x-show="submitted">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </span>
+                            <span x-show="!submitted">Subscribe</span>
+                        </button>
                     </div>
+                    <small x-show="email && !valid" class="text-danger">
+                        Email tidak valid
+                    </small>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    function editComment(id, content) {
-        document.getElementById('editCommentForm').action = "{{ url('comment') }}/" + id;
-        document.getElementById('edit-content').value = content.replace(/\\'/g, "'");
-        var modal = new bootstrap.Modal(document.getElementById('editCommentModal'));
-        modal.show();
-    }
-
-    function shareNews() {
-        if (navigator.share) {
-            navigator.share({
-                title: "{{ $news->title }}",
-                text: "{{ Str::limit(strip_tags($news->content), 100) }}",
-                url: window.location.href
-            })
-            .catch(error => console.log('Error sharing:', error));
-        } else {
-            // Fallback for browsers that don't support the Web Share API
-            prompt("Copy link to share:", window.location.href);
-        }
-    }
-</script>
 @endsection

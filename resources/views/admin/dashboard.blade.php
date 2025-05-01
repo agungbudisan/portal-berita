@@ -53,44 +53,68 @@
 </div>
 
 <!-- API Status -->
-<div class="card mb-4">
+<div class="card mb-4" x-data="{ loading: {} }">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title">Status API</h5>
             <a href="{{ route('admin.api-sources.index') }}" class="btn btn-sm btn-primary">Kelola API</a>
         </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nama API</th>
-                    <th>Status</th>
-                    <th>Last Sync</th>
-                    <th>Berita</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($apiSources as $api)
-                <tr>
-                    <td>{{ $api->name }}</td>
-                    <td>
-                        <span class="badge {{ $api->status == 'active' ? 'bg-success' : 'bg-danger' }}">
-                            {{ $api->status == 'active' ? 'Active' : 'Inactive' }}
-                        </span>
-                    </td>
-                    <td>{{ $api->last_sync ? $api->last_sync->format('d-M-Y H:i') : 'Belum Pernah' }}</td>
-                    <td>{{ $api->news_count }}</td>
-                    <td>
-                        <form action="{{ route('admin.api-sources.refresh', $api) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Refresh</button>
-                        </form>
-                        <a href="{{ route('admin.api-sources.edit', $api) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nama API</th>
+                        <th>Status</th>
+                        <th>Last Sync</th>
+                        <th>Berita</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($apiSources as $api)
+                    <tr>
+                        <td>{{ $api->name }}</td>
+                        <td>
+                            <span class="badge {{ $api->status == 'active' ? 'bg-success' : 'bg-danger' }}">
+                                {{ $api->status == 'active' ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>{{ $api->last_sync ? $api->last_sync->format('d-M-Y H:i') : 'Belum Pernah' }}</td>
+                        <td>{{ $api->news_count }}</td>
+                        <td>
+                            <button @click="
+                                loading[{{ $api->id }}] = true;
+                                fetch('{{ route('admin.api-sources.refresh', $api) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        window.location.reload();
+                                    } else {
+                                        alert('Error: ' + data.message);
+                                    }
+                                })
+                                .finally(() => {
+                                    loading[{{ $api->id }}] = false;
+                                });
+                            " class="btn btn-sm btn-outline-primary me-1" x-bind:disabled="loading[{{ $api->id }}]">
+                                <span x-show="loading[{{ $api->id }}]">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                                <span x-show="!loading[{{ $api->id }}]">Refresh</span>
+                            </button>
+                            <a href="{{ route('admin.api-sources.edit', $api) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

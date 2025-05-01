@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
+      x-bind:class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -112,26 +114,94 @@
         .dashboard-menu .nav-link:hover {
             background-color: rgba(255,255,255,0.1);
         }
+
+        /* Dark Mode Styles */
+        .dark {
+            background-color: #121212;
+            color: #e1e1e1;
+        }
+
+        .dark .card, .dark .sidebar, .dark .footer, .dark .hero-section {
+            background-color: #1e1e1e !important;
+            color: #e1e1e1 !important;
+            border-color: #333 !important;
+        }
+
+        .dark .bg-white, .dark .bg-light {
+            background-color: #1e1e1e !important;
+            color: #e1e1e1 !important;
+        }
+
+        .dark .text-dark {
+            color: #e1e1e1 !important;
+        }
+
+        .dark .navbar, .dark .header {
+            background-color: #1e1e1e !important;
+            border-color: #333 !important;
+        }
+
+        .dark .form-control {
+            background-color: #2d2d2d;
+            border-color: #444;
+            color: #e1e1e1;
+        }
+
+        .dark .news-card {
+            border-color: #333;
+            background-color: #1e1e1e;
+        }
+
+        .dark .text-muted {
+            color: #aaa !important;
+        }
+
+        .dark a:not(.btn) {
+            color: #6d9fee;
+        }
+
+        .dark .list-group-item {
+            background-color: #1e1e1e;
+            border-color: #333;
+            color: #e1e1e1;
+        }
     </style>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Alpine.js CDN as fallback -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
+<body x-bind:class="{ 'bg-dark text-light': darkMode }">
     @include('layouts.navigation')
 
     <main class="container my-4">
         @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div x-data="{ show: true }"
+                 x-init="setTimeout(() => show = false, 5000)"
+                 x-show="show"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
                 {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" @click="show = false" class="btn-close" aria-label="Close"></button>
             </div>
         @endif
 
         @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div x-data="{ show: true }"
+                 x-init="setTimeout(() => show = false, 5000)"
+                 x-show="show"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
                 {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" @click="show = false" class="btn-close" aria-label="Close"></button>
             </div>
         @endif
 
