@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'news_api' => [
+        'key' => env('NEWS_API_KEY'),
+        'url' => 'https://newsapi.org/v2/top-headlines',
+    ],
+
+    'guardian_api' => [
+        'key' => env('GUARDIAN_API_KEY'),
+        'url' => 'https://content.guardianapis.com/search',
+    ],
+
+    'news_data_io' => [
+        'key' => env('NEWS_DATA_IO_API_KEY'),
+        'url' => 'https://newsdata.io/api/1/latest',
+    ],
+
+    'gnews' => [
+        'key' => env('GNEWS_API_KEY'),
+        'url' => 'https://gnews.io/api/v4/top-headlines',
+    ],
 ];
