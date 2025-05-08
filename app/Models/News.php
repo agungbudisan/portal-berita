@@ -15,6 +15,7 @@ class News extends Model
         'content',
         'image',
         'source',
+        'source_url',
         'api_id',
         'category_id',
         'published_at',
