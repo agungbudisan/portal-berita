@@ -18,6 +18,30 @@ class CategoryController extends Controller
         $this->categoryRepository = $categoryRepository;
     }
 
+    public function index()
+    {
+        $categories = $this->categoryRepository->getAllWithNewsCount();
+
+        // Group categories by first letter for alphabetical index
+        $categoriesByLetter = [];
+        foreach ($categories as $category) {
+            $firstLetter = strtoupper(substr($category->name, 0, 1));
+            if (!isset($categoriesByLetter[$firstLetter])) {
+                $categoriesByLetter[$firstLetter] = [];
+            }
+            $categoriesByLetter[$firstLetter][] = $category;
+        }
+
+        // Get trending categories (top categories by news count)
+        $trendingCategories = $this->categoryRepository->getTrending(8);
+
+        return view('category.index', compact(
+            'categories',
+            'categoriesByLetter',
+            'trendingCategories'
+        ));
+    }
+    
     public function show(Category $category)
     {
         $news = $this->newsRepository->getNewsByCategory($category, 10);

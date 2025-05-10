@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');
+Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index'])->name('category.index');
 Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
 Route::get('/search', [NewsController::class, 'search'])->name('news.search');
 
