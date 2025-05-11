@@ -11,13 +11,79 @@ use Illuminate\Support\Facades\Storage;
 
 class NewsManagementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $news = News::with('category')
-            ->latest()
-            ->paginate(10);
+        // Ambil semua kategori untuk dropdown filter
+        $categories = Category::all();
 
-        return view('admin.news.index', compact('news'));
+        // Siapkan query builder untuk news
+        $query = News::with('category')->latest();
+
+        // Filter berdasarkan pencarian
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter berdasarkan kategori
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category_id', $request->category);
+        }
+
+        // Filter berdasarkan status (published/draft)
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter berdasarkan tanggal publikasi
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('published_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('published_at', '<=', $request->date_to);
+        }
+
+        // Filter berdasarkan jumlah tampilan
+        if ($request->has('views_min') && is_numeric($request->views_min)) {
+            $query->where('views_count', '>=', $request->views_min);
+        }
+
+        if ($request->has('views_max') && is_numeric($request->views_max)) {
+            $query->where('views_count', '<=', $request->views_max);
+        }
+
+        // Filter berdasarkan sumber
+        if ($request->has('source') && !empty($request->source)) {
+            $query->where('source', 'like', '%' . $request->source . '%');
+        }
+
+        // Sortir berdasarkan pilihan user
+        if ($request->has('sort_by')) {
+            switch ($request->sort_by) {
+                case 'oldest':
+                    $query->oldest();
+                    break;
+                case 'most_viewed':
+                    $query->orderBy('views_count', 'desc');
+                    break;
+                case 'most_commented':
+                    $query->withCount('comments')->orderBy('comments_count', 'desc');
+                    break;
+                case 'title_asc':
+                    $query->orderBy('title', 'asc');
+                    break;
+                case 'title_desc':
+                    $query->orderBy('title', 'desc');
+                    break;
+                default: // 'newest' is default
+                    $query->latest();
+            }
+        }
+
+        // Eksekusi query dengan paginasi
+        $news = $query->paginate(10)->withQueryString();
+
+        return view('admin.news.index', compact('news', 'categories'));
     }
 
     public function create()
@@ -34,6 +100,7 @@ class NewsManagementController extends Controller
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:published,draft',
         ]);
 
         $slug = Str::slug($validated['title']);
@@ -45,7 +112,8 @@ class NewsManagementController extends Controller
             'content' => $validated['content'],
             'category_id' => $validated['category_id'],
             'source' => $validated['source'] ?? 'WinniNews',
-            'published_at' => now(),
+            'status' => $validated['status'] ?? 'published',
+            'published_at' => ($validated['status'] ?? 'published') === 'published' ? now() : null,
         ]);
 
         if ($request->hasFile('image')) {
@@ -77,6 +145,7 @@ class NewsManagementController extends Controller
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:published,draft',
         ]);
 
         // Update slug hanya jika judul berubah
@@ -90,6 +159,17 @@ class NewsManagementController extends Controller
         $news->content = $validated['content'];
         $news->category_id = $validated['category_id'];
         $news->source = $validated['source'] ?? $news->source;
+        $news->status = $validated['status'] ?? $news->status;
+
+        // Update published_at hanya jika status berubah dari draft ke published
+        if ($news->status === 'draft' && $validated['status'] === 'published') {
+            $news->published_at = now();
+        }
+
+        // Jika status berubah dari published ke draft, set published_at ke null
+        if ($news->status === 'published' && $validated['status'] === 'draft') {
+            $news->published_at = null;
+        }
 
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
@@ -138,5 +218,27 @@ class NewsManagementController extends Controller
         }
 
         return $slug;
+    }
+
+    /**
+     * Upload gambar dari editor WYSIWYG
+     */
+    public function uploadImage(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|image|max:2048',
+        ]);
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('news/content', 'public');
+
+            return response()->json([
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'File tidak valid'
+        ], 400);
     }
 }
