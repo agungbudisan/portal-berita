@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('url');
             $table->string('api_key')->nullable();
+            $table->json('params')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamp('last_sync')->nullable();
             $table->integer('news_count')->default(0);

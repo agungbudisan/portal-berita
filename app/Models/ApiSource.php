@@ -13,12 +13,14 @@ class ApiSource extends Model
         'name',
         'url',
         'api_key',
+        'params',
         'status',
         'last_sync',
         'news_count',
     ];
 
     protected $casts = [
+        'params' => 'array',
         'last_sync' => 'datetime',
     ];
 

@@ -66,7 +66,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // API Management
     Route::resource('api-sources', ApiSourceController::class);
-    Route::post('/api-sources/{apiSource}/refresh', [ApiSourceController::class, 'refresh'])->name('api-sources.refresh');
+    Route::post('api-sources/{apiSource}/refresh', [ApiSourceController::class, 'refresh'])->name('api-sources.refresh');
+    Route::post('api-sources/refresh-all', [ApiSourceController::class, 'refreshAll'])->name('api-sources.refresh-all');
+    Route::post('api-sources/test-connection', [ApiSourceController::class, 'testConnection'])->name('api-sources.test-connection');
 });
 
 // Profile Routes (from Breeze)
