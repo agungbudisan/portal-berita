@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\News;
 use App\Repositories\NewsRepository;
 use App\Repositories\CategoryRepository;
 use Illuminate\Http\Request;
@@ -19,16 +21,36 @@ class HomeController extends Controller
 
     public function index()
     {
-        $featuredNews = $this->newsRepository->getFeaturedNews();
-        $latestNews = $this->newsRepository->getLatestNews(8);
-        $popularNews = $this->newsRepository->getPopularNews(5);
-        $categories = $this->categoryRepository->getAllWithNewsCount(5);
+        // Ambil berita unggulan (featured) yang sudah dipublikasikan
+        $featuredNews = News::with('category')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderBy('published_at', 'desc')
+            ->first();
 
-        return view('home', compact(
-            'featuredNews',
-            'latestNews',
-            'popularNews',
-            'categories'
-        ));
+        // Ambil berita terbaru yang sudah dipublikasikan
+        $latestNews = News::with('category')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderBy('published_at', 'desc')
+            ->paginate(6);
+
+        // Ambil berita populer yang sudah dipublikasikan
+        $popularNews = News::with('category')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderBy('views_count', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Ambil kategori dengan jumlah berita (hanya menghitung berita yang published)
+        $categories = Category::withCount(['news' => function ($query) {
+            $query->where('status', 'published')
+                ->whereNotNull('published_at');
+        }])
+        ->orderBy('news_count', 'desc')
+        ->get();
+
+        return view('home', compact('featuredNews', 'latestNews', 'popularNews', 'categories'));
     }
 }

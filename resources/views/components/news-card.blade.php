@@ -24,7 +24,13 @@
         <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
                 <i class="bi bi-clock me-1 small"></i>
-                <small class="text-muted">{{ $news->published_at->diffForHumans() }}</small>
+                <small class="text-muted">
+                    @if($news->published_at)
+                        {{ $news->published_at->diffForHumans() }}
+                    @else
+                        Baru saja
+                    @endif
+                </small>
                 @if($news->source)
                     <small class="text-muted ms-2">
                         <span class="mx-1">•</span>

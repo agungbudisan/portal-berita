@@ -20,15 +20,30 @@
             <div class="d-flex align-items-center mb-3">
                 <div class="category-badge">{{ $news->category->name }}</div>
                 <div class="ms-auto">
+                    <!-- Status badge for drafts (visible to admins) -->
+                    @if($news->status === 'draft' && Auth::check() && Auth::user()->isAdmin())
+                        <span class="badge bg-warning text-dark me-2">Draft</span>
+                    @endif
+
                     <!-- Publication Info -->
-                    <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> {{ $news->published_at->format('d F Y, H:i') }} WIB</small>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        @if($news->published_at)
+                            {{ $news->published_at->format('d F Y, H:i') }} WIB
+                        @else
+                            Belum dipublikasi
+                        @endif
+                    </small>
                 </div>
             </div>
 
             <h1 class="fs-2 fw-bold mb-3">{{ $news->title }}</h1>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
+                <div class="d-flex align-items-center">
+                    <small class="text-muted d-flex align-items-center me-3">
+                        <i class="bi bi-eye me-1"></i> {{ number_format($news->views_count) }} kali dibaca
+                    </small>
                     <small class="text-muted d-flex align-items-center">
                         <i class="bi bi-newspaper me-1"></i> Sumber: {{ $news->source }}
                     </small>
@@ -65,10 +80,17 @@
 
             <!-- Featured Image -->
             @if($news->image)
-            <div class="mb-4 text-center">
-                <img src="{{ asset('storage/'.$news->image) }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
-                <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
-            </div>
+                @if(Str::startsWith($news->image, ['http://', 'https://']))
+                    <div class="mb-4 text-center">
+                        <img src="{{ $news->image }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
+                        <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
+                    </div>
+                @else
+                    <div class="mb-4 text-center">
+                        <img src="{{ asset('storage/'.$news->image) }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
+                        <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
+                    </div>
+                @endif
             @else
             <div class="mb-4 rounded bg-light p-5 text-center shadow-sm">
                 <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
@@ -96,11 +118,16 @@
         <div class="bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Terkait</h5>
             <div class="row g-3">
-                @foreach($relatedNews as $related)
+                @forelse($relatedNews as $related)
                 <div class="col-md-6">
                     @include('components.related-news-card', ['news' => $related])
                 </div>
-                @endforeach
+                @empty
+                <div class="col-12 text-center py-4">
+                    <i class="bi bi-newspaper display-6 text-muted"></i>
+                    <p class="mt-3 text-muted">Belum ada berita terkait kategori ini.</p>
+                </div>
+                @endforelse
             </div>
         </div>
 
@@ -325,8 +352,18 @@
                                     <i class="bi bi-box-arrow-up-right text-muted small"></i>
                                 @endif
                             </h6>
-                            <div class="d-flex align-items-center">
-                                <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ $popular->published_at->diffForHumans() }}</small>
+                            <div class="d-flex align-items-center small">
+                                <span class="text-muted me-2">
+                                    <i class="bi bi-eye me-1"></i> {{ number_format($popular->views_count) }}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>
+                                    @if($popular->published_at)
+                                        {{ $popular->published_at->diffForHumans() }}
+                                    @else
+                                        Baru saja
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -339,7 +376,9 @@
         <div class="bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori</h5>
             <div class="list-group list-group-flush">
-                @foreach(\App\Models\Category::withCount('news')->orderBy('news_count', 'desc')->take(5)->get() as $category)
+                @foreach(\App\Models\Category::withCount(['news' => function($query) {
+                    $query->where('status', 'published')->whereNotNull('published_at');
+                }])->orderBy('news_count', 'desc')->take(5)->get() as $category)
                 <a href="{{ route('category.show', $category) }}"
                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-2 px-0
                           {{ $news->category_id == $category->id ? 'fw-bold text-primary' : '' }}">

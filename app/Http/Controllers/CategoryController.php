@@ -41,18 +41,15 @@ class CategoryController extends Controller
             'trendingCategories'
         ));
     }
-    
+
     public function show(Category $category)
     {
-        $news = $this->newsRepository->getNewsByCategory($category, 10);
-        $popularInCategory = $this->newsRepository->getPopularNewsByCategory($category, 3);
-        $otherCategories = $this->categoryRepository->getExcept($category, 4);
+        $news = $category->news()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->latest('published_at')
+            ->paginate(10);
 
-        return view('category.show', compact(
-            'category',
-            'news',
-            'popularInCategory',
-            'otherCategories'
-        ));
+        return view('category.show', compact('category', 'news'));
     }
 }

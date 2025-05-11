@@ -23,7 +23,13 @@
                     <p class="text-muted">{{ Str::limit(strip_tags($featuredNews->content), 150) }}</p>
                     <div class="d-flex align-items-center mt-3">
                         <i class="bi bi-clock me-1"></i>
-                        <small class="text-muted">{{ $featuredNews->published_at->diffForHumans() }}</small>
+                        <small class="text-muted">
+                            @if($featuredNews->published_at)
+                                {{ $featuredNews->published_at->diffForHumans() }}
+                            @else
+                                Baru saja
+                            @endif
+                        </small>
                         @if($featuredNews->source)
                             <small class="text-muted ms-2">
                                 <span class="mx-1">•</span>
@@ -63,7 +69,7 @@
         <!-- News Grid -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="wgt-title mb-0">Berita Terbaru</h5>
-            <a href="#" class="text-decoration-none small">Lihat Semua <i class="bi bi-chevron-right"></i></a>
+            <a href="{{ route('news.index') }}" class="text-decoration-none small">Lihat Semua <i class="bi bi-chevron-right"></i></a>
         </div>
 
         <div class="row">
@@ -124,7 +130,11 @@
                             <div class="d-flex align-items-center">
                                 <small class="text-muted">
                                     <i class="bi bi-clock me-1"></i>
-                                    {{ $news->published_at->diffForHumans() }}
+                                    @if($news->published_at)
+                                        {{ $news->published_at->diffForHumans() }}
+                                    @else
+                                        Baru saja
+                                    @endif
                                 </small>
                                 @if($news->source)
                                     <small class="text-muted ms-2">

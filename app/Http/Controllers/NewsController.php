@@ -2,23 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\News;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
+    public function index(Request $request)
+    {
+        // Base query untuk berita yang sudah dipublikasikan
+        $query = News::with('category')
+            ->where('status', 'published')
+            ->whereNotNull('published_at');
+
+        // Filter berdasarkan kategori jika ada
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category_id', $request->category);
+        }
+
+        // Filter berdasarkan tanggal jika ada
+        if ($request->has('date_from') && !empty($request->date_from)) {
+            $query->whereDate('published_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && !empty($request->date_to)) {
+            $query->whereDate('published_at', '<=', $request->date_to);
+        }
+
+        // Pengurutan berita
+        if ($request->has('sort') && !empty($request->sort)) {
+            switch ($request->sort) {
+                case 'oldest':
+                    $query->oldest('published_at');
+                    break;
+                case 'most_viewed':
+                    $query->orderBy('views_count', 'desc');
+                    break;
+                case 'most_commented':
+                    $query->withCount('comments')->orderBy('comments_count', 'desc');
+                    break;
+                default:
+                    $query->latest('published_at');
+            }
+        } else {
+            $query->latest('published_at');
+        }
+
+        // Ambil semua kategori untuk filter
+        $categories = Category::withCount(['news' => function($query) {
+            $query->where('status', 'published')->whereNotNull('published_at');
+        }])->orderBy('name')->get();
+
+        // Dapatkan berita dengan pagination
+        $news = $query->paginate(12)->withQueryString();
+
+        return view('news.index', compact('news', 'categories'));
+    }
+
     public function show(News $news)
     {
+        // Jika berita masih draft dan pengguna bukan admin, redirect ke halaman utama
+        if ($news->status === 'draft' && (!Auth::check() || !Auth::user()==='admin')) {
+            return redirect()->route('home')
+                ->with('error', 'Berita tidak tersedia.');
+        }
+
+        // Increment views count
+        $news->increment('views_count');
+
         $news->load(['category', 'approvedComments.user']);
 
+        // Ambil berita terkait dari kategori yang sama (hanya yang published)
         $relatedNews = News::where('category_id', $news->category_id)
             ->where('id', '!=', $news->id)
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
             ->latest('published_at')
             ->take(2)
             ->get();
 
+        // Ambil berita populer berdasarkan jumlah komentar (hanya yang published)
         $popularNews = News::withCount('comments')
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
             ->orderBy('comments_count', 'desc')
             ->take(3)
             ->get();
@@ -37,9 +104,12 @@ class NewsController extends Controller
     {
         $query = $request->input('query');
 
-        $news = News::where('title', 'like', "%{$query}%")
-            ->orWhere('content', 'like', "%{$query}%")
-            ->with('category')
+        $news = News::where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                ->orWhere('content', 'like', "%{$query}%");
+            })
             ->latest('published_at')
             ->paginate(10);
 

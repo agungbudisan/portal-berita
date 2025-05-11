@@ -18,6 +18,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+    <!-- Summernote WYSIWYG Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+
     <!-- Custom Styles -->
     <style>
         :root {
@@ -272,11 +277,14 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition-default);
             border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary-color);
         }
 
         .stat-card-icon {
@@ -326,10 +334,21 @@
             margin-bottom: 0;
         }
 
-        .table th {
+        .table thead th {
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
             font-weight: 600;
             color: var(--text-muted);
             border-bottom-width: 1px;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.03);
         }
 
         .btn {
@@ -342,13 +361,14 @@
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(var(--bs-primary-rgb), 0.2);
         }
 
         .btn-primary:hover, .btn-primary:focus {
             background-color: #e54483;
             border-color: #e54483;
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(229, 68, 131, 0.2);
+            box-shadow: 0 6px 8px rgba(var(--bs-primary-rgb), 0.25);
         }
 
         .btn-sm {
@@ -361,6 +381,113 @@
             border: none;
             box-shadow: var(--shadow-sm);
             margin-bottom: 1.5rem;
+            animation: slideInDown 0.5s ease forwards;
+            border-radius: var(--border-radius-md);
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            border-left-color: var(--bs-success);
+        }
+
+        .alert-danger {
+            border-left-color: var(--bs-danger);
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Badge style improvisasi */
+        .badge {
+            padding: 0.5em 0.75em;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        /* Form styling */
+        .form-control, .form-select {
+            border-radius: var(--border-radius-sm);
+            padding: 0.75rem 1rem;
+            border-color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
+        }
+
+        /* Content preview cards */
+        .content-preview {
+            height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .content-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
+        }
+
+        /* Image preview component */
+        .image-preview-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            border: 1px dashed #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .image-preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Improved avatar */
+        .avatar-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Custom file input */
+        .form-control[type="file"] {
+            padding: 0.375rem 0.75rem;
+        }
+
+        .form-control[type="file"]::file-selector-button {
+            padding: 0.375rem 0.75rem;
+            margin: -0.375rem -0.75rem;
+            margin-inline-end: 0.75rem;
+            border: 0;
+            border-radius: var(--border-radius-sm);
+            transition: all 0.2s ease-in-out;
+            background-color: var(--primary-color);
+            color: white;
         }
 
         /* Dark Mode Styles */
@@ -416,6 +543,7 @@
 
         .dark .table th {
             color: var(--text-muted-dark);
+            background-color: rgba(65, 105, 225, 0.1);
         }
 
         .dark .table td,
@@ -431,7 +559,85 @@
             color: var(--text-light);
         }
 
-        /* Responsive styles */
+        .dark .form-control, .dark .form-select {
+            background-color: var(--dark-card);
+            border-color: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .dark .form-control:focus, .dark .form-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .dark .image-preview-container {
+            background-color: var(--dark-card);
+            border-color: var(--dark-border);
+        }
+
+        .dark .content-preview::after {
+            background: linear-gradient(rgba(30,41,59,0), rgba(30,41,59,1));
+        }
+
+        .dark .note-editor.note-frame {
+            background-color: var(--dark-card);
+            border-color: var(--dark-border);
+        }
+
+        .dark .note-editor.note-frame .note-editing-area,
+        .dark .note-editor.note-frame .note-statusbar {
+            background-color: var(--dark-card);
+            color: var(--text-light);
+        }
+
+        .dark .note-editor.note-frame .note-toolbar {
+            background-color: var(--dark-bg);
+            border-color: var(--dark-border);
+        }
+
+        .dark .modal-content {
+            background-color: var(--dark-card);
+            border-color: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .dark .modal-header, .dark .modal-footer {
+            border-color: var(--dark-border);
+        }
+
+        .dark .pagination .page-item .page-link {
+            background-color: var(--dark-card);
+            border-color: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .dark .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .dark .alert {
+            background-color: var(--dark-card);
+            color: var(--text-light);
+        }
+
+        /* Pagination styling */
+        .pagination {
+            margin-bottom: 0;
+        }
+
+        .pagination .page-item .page-link {
+            border-radius: var(--border-radius-sm);
+            margin: 0 2px;
+            color: var(--text-dark);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Responsiveness enhancement */
         @media (max-width: 991.98px) {
             .dashboard-sidebar {
                 width: 250px;
@@ -460,6 +666,91 @@
             .stat-card {
                 margin-bottom: 1rem;
             }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .form-control-lg {
+                font-size: 1rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            font-size: 1.2rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        /* Loader */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: var(--primary-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tooltip enhancement */
+        .tooltip {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.75rem;
+        }
+
+        .tooltip .tooltip-inner {
+            box-shadow: var(--shadow-sm);
+            padding: 0.5rem 0.75rem;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
     </style>
 
@@ -589,8 +880,8 @@
                     </a>
 
                     <div class="user-profile">
-                        <span class="user-name">{{ Auth::user()->name }}</span>
-                        <div class="user-avatar">
+                        <span class="user-name d-none d-md-block">{{ Auth::user()->name }}</span>
+                        <div class="user-avatar" style="background-color: {{ ['#FF4B91', '#4169E1', '#FFC107', '#20C997'][array_rand(['#FF4B91', '#4169E1', '#FFC107', '#20C997'])] }};">
                             {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
                     </div>
@@ -635,10 +926,51 @@
 
                 @yield('content')
             </div>
+
+            <!-- Footer -->
+            <footer class="mt-auto py-3 bg-white border-top">
+                <div class="container-fluid">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            &copy; {{ date('Y') }} WinniNews. All rights reserved.
+                        </div>
+                        <div class="d-flex mt-2 mt-md-0">
+                            <div class="text-muted small me-3">
+                                <i class="bi bi-clock me-1"></i> Server time: {{ now()->format('H:i:s') }}
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1"></i> Version 1.0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Tooltips initialization for all elements with data-bs-toggle="tooltip" -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+
+    <!-- Global AJAX Setup for CSRF token -->
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
+
+    <!-- Additional scripts for specific pages -->
+    @stack('scripts')
 </body>
 </html>
