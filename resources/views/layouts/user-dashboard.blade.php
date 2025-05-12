@@ -519,11 +519,6 @@
                 <a href="{{ route('user.dashboard') }}" class="text-decoration-none">
                     <div class="logo">Winni<span>News</span></div>
                 </a>
-                <button type="button"
-                        class="d-none d-lg-block btn btn-sm text-white bg-transparent border-0"
-                        @click="sidebarCollapsed = !sidebarCollapsed">
-                    <i class="bi" x-bind:class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
-                </button>
             </div>
 
             <div class="sidebar-content">
@@ -552,9 +547,10 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.edit') }}">
-                                <i class="bi bi-person"></i>
-                                <span>Profil</span>
+                            <a class="nav-link {{ request()->routeIs('user.profile.edit') ? 'active' : '' }}"
+                               href="{{ route('user.profile.edit') }}">
+                                <i class="bi bi-chat-dots"></i>
+                                <span>Profil Saya</span>
                             </a>
                         </li>
                     </ul>

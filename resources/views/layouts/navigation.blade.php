@@ -97,7 +97,7 @@
                                     <li><a class="dropdown-item" href="{{ route('user.comments') }}">Komentar Saya</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                 @endif
-                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profil</a></li>
+                                <li><a class="dropdown-item" href="{{ route('user.profile.edit') }}">Profil</a></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -138,7 +138,7 @@
                         <div class="user-name">{{ Auth::user()->name }}</div>
                     </div>
                     <div class="d-grid gap-2">
-                        <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('user.profile.edit') }}" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-person-gear me-1"></i> Edit Profil
                         </a>
                         <form method="POST" action="{{ route('logout') }}">

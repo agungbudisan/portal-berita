@@ -41,6 +41,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::get('/bookmarks', [UserBookmarkController::class, 'index'])->name('bookmarks');
         Route::get('/comments', [UserCommentController::class, 'index'])->name('comments');
+
+        // Profile Management
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
 });
 
@@ -70,13 +75,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('api-sources/{apiSource}/refresh', [ApiSourceController::class, 'refresh'])->name('api-sources.refresh');
     Route::post('api-sources/refresh-all', [ApiSourceController::class, 'refreshAll'])->name('api-sources.refresh-all');
     Route::post('api-sources/test-connection', [ApiSourceController::class, 'testConnection'])->name('api-sources.test-connection');
-});
-
-// Profile Routes (from Breeze)
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';
