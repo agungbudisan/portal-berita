@@ -33,17 +33,13 @@
                 try {
                     const response = await fetch(`{{ route('category.show', $category) }}?page=${this.page}`);
                     const html = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newItems = doc.querySelectorAll('.news-article');
 
-                    if (newItems.length === 0) {
+                    // Jika tidak ada konten baru
+                    if (html.trim() === '') {
                         this.noMoreContent = true;
                     } else {
                         const container = document.querySelector('.appended-content');
-                        newItems.forEach(item => {
-                            container.appendChild(item.cloneNode(true));
-                        });
+                        container.insertAdjacentHTML('beforeend', html);
                     }
                 } catch (error) {
                     console.error('Error loading more articles:', error);
@@ -116,7 +112,7 @@
             </div>
         </div>
 
-        {{-- <!-- Popular News in Category -->
+        <!-- Popular News in Category -->
         <div class="bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Populer di {{ $category->name }}</h5>
             <div class="list-group list-group-flush">
@@ -167,7 +163,7 @@
                     <i class="bi bi-grid-3x3-gap me-1"></i> Lihat Semua Kategori
                 </a>
             </div>
-        </div> --}}
+        </div>
 
         <!-- Newsletter Widget -->
         <div class="card border-0 shadow-sm mb-4">

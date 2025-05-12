@@ -12,6 +12,11 @@ class CategoryController extends Controller
     protected $newsRepository;
     protected $categoryRepository;
 
+    // Konstanta untuk konfigurasi pagination
+    private const ITEMS_PER_PAGE = 10;
+    private const POPULAR_ITEMS_LIMIT = 5;
+    private const OTHER_CATEGORIES_LIMIT = 6;
+
     public function __construct(NewsRepository $newsRepository, CategoryRepository $categoryRepository)
     {
         $this->newsRepository = $newsRepository;
@@ -42,14 +47,37 @@ class CategoryController extends Controller
         ));
     }
 
-    public function show(Category $category)
+    public function show(Request $request, Category $category)
     {
+        // Dapatkan berita berdasarkan kategori
         $news = $category->news()
             ->where('status', 'published')
             ->whereNotNull('published_at')
             ->latest('published_at')
-            ->paginate(10);
+            ->paginate(self::ITEMS_PER_PAGE);
 
-        return view('category.show', compact('category', 'news'));
+        // Jika request AJAX (untuk infinite scroll), kembalikan hanya partial view
+        if ($request->ajax()) {
+            return view('components.news-list', compact('news'));
+        }
+
+        // Dapatkan berita populer dalam kategori (berdasarkan views atau parameter lain)
+        $popularInCategory = $this->newsRepository->getPopularByCategory(
+            $category->id,
+            self::POPULAR_ITEMS_LIMIT
+        );
+
+        // Dapatkan kategori lainnya untuk sidebar
+        $otherCategories = $this->categoryRepository->getOtherCategoriesWithCount(
+            $category->id,
+            self::OTHER_CATEGORIES_LIMIT
+        );
+
+        return view('category.show', compact(
+            'category',
+            'news',
+            'popularInCategory',
+            'otherCategories'
+        ));
     }
 }

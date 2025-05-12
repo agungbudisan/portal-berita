@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 
 class CategoryRepository
 {
@@ -67,6 +68,26 @@ class CategoryRepository
         return Category::where('name', 'LIKE', $letter . '%')
             ->withCount('news')
             ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get categories with news count and limit.
+     *
+     * @param int $excludeCategoryId
+     * @param int $limit
+     * @return Collection
+     */
+    public function getOtherCategoriesWithCount(int $excludeCategoryId, int $limit = 6): Collection
+    {
+        return Category::withCount(['news' => function ($query) {
+                $query->where('status', 'published')
+                      ->whereNotNull('published_at');
+            }])
+            ->where('id', '!=', $excludeCategoryId)
+            ->having('news_count', '>', 0)
+            ->orderBy('news_count', 'desc')
+            ->limit($limit)
             ->get();
     }
 }
