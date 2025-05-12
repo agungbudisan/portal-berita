@@ -1,26 +1,15 @@
 {
     "version": 2,
     "framework": null,
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "vercel-php@0.6.0",
-            "config": {
-                "maxLambdaSize": "16mb",
-                "buildCommand": "npm install --no-optional && vite build"
-            }
-        }
-    ],
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.6.0" }
     },
     "routes": [
-        { "src": "/build/(.*)", "dest": "/public/build/$1" },
-        { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
-        { "src": "/(css|js|images|fonts)/(.*)", "dest": "/public/$1/$2" },
+        { "src": "/build/(.*)", "dest": "/public/build/" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
+    "buildCommand": "vite build",
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
@@ -40,7 +29,6 @@
         "DB_HOST": "61851.h.filess.io",
         "DB_PORT": "3307",
         "DB_DATABASE": "winninews_exercisein",
-        "DB_USERNAME": "winninews_exercisein",
-        "NODE_OPTIONS": "--max_old_space_size=4096"
+        "DB_USERNAME": "winninews_exercisein"
     }
 }
