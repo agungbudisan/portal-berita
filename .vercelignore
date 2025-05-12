@@ -1,2 +1,7 @@
-vendor
 node_modules
+.git
+.github
+.vscode
+tests
+phpunit.xml
+.phpunit.result.cache
