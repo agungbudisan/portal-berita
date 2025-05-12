@@ -123,4 +123,16 @@ class NewsRepository
     {
         return News::whereDate('created_at', today())->count();
     }
+
+    /**
+     * Get purified content of the news
+     *
+     * @param News $news
+     * @return string
+     */
+    public function getPurifiedContent(News $news)
+    {
+        $purifier = app('htmlpurifier');
+        return $purifier->purify($news->content);
+    }
 }

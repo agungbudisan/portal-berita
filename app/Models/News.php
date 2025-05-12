@@ -65,15 +65,25 @@ class News extends Model
     }
 
     public function getImageUrlAttribute()
-{
-    if (!$this->image) {
-        return asset('images/placeholder.jpg'); // Placeholder default
+    {
+        if (!$this->image) {
+            return asset('images/placeholder.jpg'); // Placeholder default
+        }
+
+        if (Str::startsWith($this->image, ['http://', 'https://'])) {
+            return $this->image; // URL eksternal, gunakan langsung
+        }
+
+        return asset('storage/' . $this->image); // File lokal, gunakan storage
     }
 
-    if (Str::startsWith($this->image, ['http://', 'https://'])) {
-        return $this->image; // URL eksternal, gunakan langsung
-    }
+    public function getPurifiedContentAttribute()
+    {
+        if (empty($this->content)) {
+            return '';
+        }
 
-    return asset('storage/' . $this->image); // File lokal, gunakan storage
-}
+        $purifier = app('htmlpurifier');
+        return $purifier->purify($this->content);
+    }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\News;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,6 +73,7 @@ class NewsController extends Controller
         // Increment views count
         $news->increment('views_count');
 
+        // Load relasi yang diperlukan
         $news->load(['category', 'approvedComments.user']);
 
         // Ambil berita terkait dari kategori yang sama (hanya yang published)
@@ -90,14 +93,60 @@ class NewsController extends Controller
             ->take(3)
             ->get();
 
+        // Cek status bookmark
         $isBookmarked = Auth::check() ? $news->isBookmarkedByUser(Auth::user()) : false;
+
+        // Purifikasi konten HTML
+        $purifier = $this->getHtmlPurifier();
+        $purifiedContent = $purifier->purify($news->content);
 
         return view('news.show', compact(
             'news',
             'relatedNews',
             'popularNews',
-            'isBookmarked'
+            'isBookmarked',
+            'purifiedContent'
         ));
+    }
+
+    /**
+     * Mendapatkan instance HTML Purifier dengan konfigurasi yang sesuai
+     *
+     * @return \HTMLPurifier
+     */
+    private function getHtmlPurifier()
+    {
+        // Inisialisasi HTML Purifier dengan konfigurasi keamanan
+        $config = HTMLPurifier_Config::createDefault();
+
+        // Konfigurasi dasar
+        $config->set('Core.Encoding', 'UTF-8');
+        $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
+
+        // Konfigurasi cache
+        $cachePath = storage_path('app/purifier');
+        if (!file_exists($cachePath)) {
+            mkdir($cachePath, 0755, true);
+        }
+        $config->set('Cache.SerializerPath', $cachePath);
+
+        // Whitelist tag HTML yang diizinkan
+        $config->set('HTML.Allowed', 'p,b,i,u,strong,em,a[href|title],ul,ol,li,br,span,div,h1,h2,h3,h4,h5,h6,img[src|alt|title|width|height],table[width|border],tr,td[width],th[width],thead,tbody,hr,blockquote');
+
+        // Konfigurasi tambahan
+        $config->set('HTML.TargetBlank', true);
+        $config->set('AutoFormat.RemoveEmpty', false);
+        $config->set('CSS.AllowedProperties', 'font,font-size,font-weight,font-style,font-family,text-decoration,color,background-color,text-align');
+
+        // URI config
+        $config->set('URI.AllowedSchemes', [
+            'http' => true,
+            'https' => true,
+            'mailto' => true,
+            'tel' => true,
+        ]);
+
+        return new HTMLPurifier($config);
     }
 
     public function search(Request $request)

@@ -100,7 +100,7 @@
 
             <!-- News Content -->
             <div class="mb-4 news-content">
-                {!! nl2br(e($news->content)) !!}
+                {!! $purifiedContent !!}
             </div>
 
             <!-- Tags -->
@@ -444,6 +444,47 @@
 .news-content {
     font-size: 1.05rem;
     line-height: 1.8;
+    overflow-wrap: break-word;
+}
+
+.news-content p {
+    margin-bottom: 1.2rem;
+}
+
+.news-content h1, .news-content h2, .news-content h3,
+.news-content h4, .news-content h5, .news-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.news-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    border-radius: 0.25rem;
+}
+
+.news-content a {
+    color: #3490dc;
+    text-decoration: none;
+}
+
+.news-content a:hover {
+    text-decoration: underline;
+}
+
+.news-content ul, .news-content ol {
+    margin-bottom: 1.2rem;
+    padding-left: 2rem;
+}
+
+.news-content blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
 }
 
 /* Text truncate for lists */
