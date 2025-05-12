@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
         // Create regular user
         User::create([
             'name' => 'Teguh Setiawan',
-            'email' => 'user@example.com',
+            'email' => 'user@winninews.com',
             'password' => Hash::make('password'),
             'role' => 'user',
             'email_verified_at' => Carbon::now(),
