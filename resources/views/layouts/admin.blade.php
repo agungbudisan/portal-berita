@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-      x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarCollapsed: window.innerWidth < 768 }"
+      x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', sidebarOpen: false }"
       x-bind:class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
@@ -81,10 +81,6 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
-        .dashboard-sidebar.collapsed {
-            width: 60px;
-        }
-
         .dashboard-main {
             flex: 1;
             margin-left: 250px;
@@ -93,15 +89,11 @@
             background-color: var(--light-bg);
         }
 
-        .dashboard-main.expanded {
-            margin-left: 60px;
-        }
-
         .sidebar-logo-container {
             padding: 1.25rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center; /* Changed from space-between to center */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -165,27 +157,6 @@
             margin-right: 0.75rem;
             font-size: 1.1rem;
             transition: var(--transition-default);
-        }
-
-        .dashboard-menu .nav-link span {
-            transition: opacity 0.3s ease;
-        }
-
-        .collapsed .sidebar-section-title,
-        .collapsed .nav-link span,
-        .collapsed .logo span {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .collapsed .nav-link {
-            padding: 0.75rem;
-            justify-content: center;
-        }
-
-        .collapsed .nav-link i {
-            margin-right: 0;
-            font-size: 1.25rem;
         }
 
         .dashboard-header {
@@ -752,6 +723,17 @@
         .dark ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        /* Footer styling */
+        footer {
+            transition: var(--transition-default);
+        }
+
+        .dark footer {
+            background-color: var(--dark-card) !important;
+            border-color: var(--dark-border) !important;
+            color: var(--text-light);
+        }
     </style>
 
     <!-- Scripts -->
@@ -761,20 +743,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-    <div class="dashboard-wrapper" x-data="{ sidebarOpen: false }">
+    <div class="dashboard-wrapper">
         <!-- Sidebar -->
         <div class="dashboard-sidebar"
-             x-bind:class="{ 'collapsed': sidebarCollapsed && !sidebarOpen, 'open': sidebarOpen }">
+             x-bind:class="{ 'open': sidebarOpen }">
 
             <div class="sidebar-logo-container">
                 <a href="{{ route('admin.dashboard') }}" class="text-decoration-none">
                     <div class="logo">Winni<span>News</span></div>
                 </a>
-                <button type="button"
-                        class="d-none d-lg-block btn btn-sm text-white bg-transparent border-0"
-                        @click="sidebarCollapsed = !sidebarCollapsed">
-                    <i class="bi" x-bind:class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
-                </button>
+                <!-- Tombol toggle sidebar dihapus pada desktop -->
             </div>
 
             <div class="sidebar-content">
@@ -851,10 +829,7 @@
 
         <!-- Main Content -->
         <div class="dashboard-main"
-             x-bind:class="{
-                'expanded': sidebarCollapsed && !sidebarOpen,
-                'shifted': sidebarOpen
-             }">
+             x-bind:class="{ 'shifted': sidebarOpen }">
 
             <!-- Header -->
             <header class="dashboard-header">
