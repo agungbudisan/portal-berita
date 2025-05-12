@@ -61,6 +61,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Comment Moderation
     Route::get('/comments', [CommentManagementController::class, 'index'])->name('comments.index');
+    Route::get('/comments/approve-all', [CommentManagementController::class, 'approveAll'])->name('comments.approve-all');
     Route::put('/comments/{comment}/approve', [CommentManagementController::class, 'approve'])->name('comments.approve');
     Route::delete('/comments/{comment}', [CommentManagementController::class, 'destroy'])->name('comments.destroy');
 

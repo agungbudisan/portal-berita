@@ -116,7 +116,7 @@
             </div>
         </div>
 
-        <!-- Popular News in Category -->
+        {{-- <!-- Popular News in Category -->
         <div class="bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Populer di {{ $category->name }}</h5>
             <div class="list-group list-group-flush">
@@ -167,7 +167,7 @@
                     <i class="bi bi-grid-3x3-gap me-1"></i> Lihat Semua Kategori
                 </a>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Newsletter Widget -->
         <div class="card border-0 shadow-sm mb-4">

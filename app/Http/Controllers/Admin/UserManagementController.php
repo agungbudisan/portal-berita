@@ -13,7 +13,11 @@ class UserManagementController extends Controller
     public function index()
     {
         $users = User::paginate(10);
-        return view('admin.users.index', compact('users'));
+        $newUsersThisMonth = User::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        return view('admin.users.index', compact('users', 'newUsersThisMonth'));
     }
 
     public function edit(User $user)

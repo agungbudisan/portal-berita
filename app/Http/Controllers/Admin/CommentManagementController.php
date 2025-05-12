@@ -30,6 +30,19 @@ class CommentManagementController extends Controller
         return back()->with('success', 'Komentar telah disetujui.');
     }
 
+    public function approveAll()
+    {
+        $pendingComments = Comment::where('status', 'pending')->get();
+
+        foreach ($pendingComments as $comment) {
+            $comment->status = 'approved';
+            $comment->save();
+        }
+
+        return redirect()->route('admin.comments.index')
+            ->with('success', count($pendingComments) . ' komentar berhasil disetujui.');
+    }
+
     public function destroy(Comment $comment)
     {
         $comment->delete();
