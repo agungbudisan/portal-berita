@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');
+Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/categories', [CategoryController::class, 'index'])->name('category.index');
 Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
 Route::get('/search', [NewsController::class, 'search'])->name('news.search');
 
@@ -39,6 +41,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::get('/bookmarks', [UserBookmarkController::class, 'index'])->name('bookmarks');
         Route::get('/comments', [UserCommentController::class, 'index'])->name('comments');
+
+        // Profile Management
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
 });
 
@@ -48,6 +55,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // News Management
     Route::resource('news', NewsManagementController::class);
+    Route::post('/upload/image', [NewsManagementController::class, 'uploadImage'])
+    ->name('upload.image');
 
     // Category Management
     Route::resource('categories', CategoryManagementController::class);
@@ -57,19 +66,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Comment Moderation
     Route::get('/comments', [CommentManagementController::class, 'index'])->name('comments.index');
+    Route::get('/comments/approve-all', [CommentManagementController::class, 'approveAll'])->name('comments.approve-all');
     Route::put('/comments/{comment}/approve', [CommentManagementController::class, 'approve'])->name('comments.approve');
     Route::delete('/comments/{comment}', [CommentManagementController::class, 'destroy'])->name('comments.destroy');
 
     // API Management
     Route::resource('api-sources', ApiSourceController::class);
-    Route::post('/api-sources/{apiSource}/refresh', [ApiSourceController::class, 'refresh'])->name('api-sources.refresh');
-});
-
-// Profile Routes (from Breeze)
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('api-sources/{apiSource}/refresh', [ApiSourceController::class, 'refresh'])->name('api-sources.refresh');
+    Route::post('api-sources/refresh-all', [ApiSourceController::class, 'refreshAll'])->name('api-sources.refresh-all');
+    Route::post('api-sources/test-connection', [ApiSourceController::class, 'testConnection'])->name('api-sources.test-connection');
 });
 
 require __DIR__.'/auth.php';

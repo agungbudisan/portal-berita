@@ -4,52 +4,88 @@ namespace App\Repositories;
 
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class CategoryRepository
 {
     /**
-     * Get all categories with news count
+     * Get all categories.
      *
-     * @param int $limit
-     * @return Collection
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getAllWithNewsCount(int $limit = 0): Collection
+    public function getAll()
     {
-        $query = Category::withCount('news')
-            ->orderBy('news_count', 'desc');
-
-        if ($limit > 0) {
-            $query->limit($limit);
-        }
-
-        return $query->get();
+        return Category::orderBy('name')->get();
     }
 
     /**
-     * Get categories for admin with pagination
+     * Get all categories with news count.
      *
-     * @param int $perPage
-     * @return LengthAwarePaginator
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getPaginated(int $perPage = 10): LengthAwarePaginator
+    public function getAllWithNewsCount()
+    {
+        return Category::withCount('news')->orderBy('name')->get();
+    }
+
+    /**
+     * Get trending categories (categories with most news).
+     *
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getTrending($limit = 6)
     {
         return Category::withCount('news')
-            ->orderBy('name')
-            ->paginate($perPage);
+            ->orderBy('news_count', 'desc')
+            ->take($limit)
+            ->get();
     }
 
     /**
-     * Get categories except the one specified
+     * Get categories except the given one.
      *
-     * @param Category $except
+     * @param Category $category
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getExcept(Category $category, $limit = 6)
+    {
+        return Category::withCount('news')
+            ->where('id', '!=', $category->id)
+            ->orderBy('news_count', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get categories by initial letter.
+     *
+     * @param string $letter
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByInitialLetter($letter)
+    {
+        return Category::where('name', 'LIKE', $letter . '%')
+            ->withCount('news')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get categories with news count and limit.
+     *
+     * @param int $excludeCategoryId
      * @param int $limit
      * @return Collection
      */
-    public function getExcept(Category $except, int $limit = 4): Collection
+    public function getOtherCategoriesWithCount(int $excludeCategoryId, int $limit = 6): Collection
     {
-        return Category::where('id', '!=', $except->id)
-            ->withCount('news')
+        return Category::withCount(['news' => function ($query) {
+                $query->where('status', 'published')
+                      ->whereNotNull('published_at');
+            }])
+            ->where('id', '!=', $excludeCategoryId)
+            ->having('news_count', '>', 0)
             ->orderBy('news_count', 'desc')
             ->limit($limit)
             ->get();

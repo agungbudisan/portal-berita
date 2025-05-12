@@ -71,12 +71,12 @@ class NewsRepository
      * @param int $limit
      * @return Collection
      */
-    public function getPopularNewsByCategory(Category $category, int $limit = 3): Collection
+    public function getPopularByCategory(int $categoryId, int $limit = 5): Collection
     {
-        return $category->news()
-            ->with('category')
-            ->withCount('comments')
-            ->orderBy('comments_count', 'desc')
+        return News::where('category_id', $categoryId)
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderBy('views_count', 'desc')
             ->limit($limit)
             ->get();
     }
@@ -122,5 +122,17 @@ class NewsRepository
     public function getTodayNewsCount(): int
     {
         return News::whereDate('created_at', today())->count();
+    }
+
+    /**
+     * Get purified content of the news
+     *
+     * @param News $news
+     * @return string
+     */
+    public function getPurifiedContent(News $news)
+    {
+        $purifier = app('htmlpurifier');
+        return $purifier->purify($news->content);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class News extends Model
 {
@@ -15,6 +16,9 @@ class News extends Model
         'content',
         'image',
         'source',
+        'source_url',
+        'status',
+        'views_count',
         'api_id',
         'category_id',
         'published_at',
@@ -58,5 +62,28 @@ class News extends Model
     public function isBookmarkedByUser(User $user)
     {
         return $this->bookmarks()->where('user_id', $user->id)->exists();
+    }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image) {
+            return asset('images/placeholder.jpg'); // Placeholder default
+        }
+
+        if (Str::startsWith($this->image, ['http://', 'https://'])) {
+            return $this->image; // URL eksternal, gunakan langsung
+        }
+
+        return asset('storage/' . $this->image); // File lokal, gunakan storage
+    }
+
+    public function getPurifiedContentAttribute()
+    {
+        if (empty($this->content)) {
+            return '';
+        }
+
+        $purifier = app('htmlpurifier');
+        return $purifier->purify($this->content);
     }
 }

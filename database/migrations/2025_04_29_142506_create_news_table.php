@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('content');
-            $table->string('image')->nullable();
+            $table->text('image')->nullable();
             $table->string('source')->nullable();
+            $table->string('source_url')->nullable();
+            $table->enum('status', ['published', 'draft'])->default('published');
+            $table->unsignedInteger('views_count')->default(0);
             $table->string('api_id')->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->timestamp('published_at')->nullable();
