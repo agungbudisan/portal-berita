@@ -11,7 +11,6 @@
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
-    "buildCommand": "chmod +x build-patch.sh && ./build-patch.sh",
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
