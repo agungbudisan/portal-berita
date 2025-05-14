@@ -12,10 +12,19 @@
     ],
     "public": true,
     "outputDirectory": "public",
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                { "key": "Content-Security-Policy", "value": "upgrade-insecure-requests" },
+                { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" }
+            ]
+        }
+    ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
-        "APP_URL": "https://yourproductionurl.com",
+        "APP_DEBUG": "true",
+        "APP_URL": "https://portal-berita-winninews.vercel.app",
         "APP_KEY": "base64:uBG7mYGh40XAkGejm7lueM6Souqn1TFlM+oMyIhola0=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
@@ -31,6 +40,7 @@
         "DB_PORT": "3307",
         "DB_DATABASE": "winninews_exercisein",
         "DB_USERNAME": "winninews_exercisein",
-        "NODE_OPTIONS": "--max-old-space-size=4096"
+        "NODE_OPTIONS": "--max-old-space-size=4096",
+        "ASSET_URL": "https://portal-berita-winninews.vercel.app"
     }
 }
