@@ -8,6 +8,7 @@
         { "src": "/build/(.*)", "dest": "/public/build/$1" },
         { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
         { "src": "/(css|js|images|fonts)/(.*)", "dest": "/public/$1/$2" },
+        { "src": "/admin(/?.*)", "dest": "/api/admin.php" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,

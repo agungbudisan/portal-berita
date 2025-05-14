@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
@@ -16,10 +17,23 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized action.');
-        }
+        try {
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('error', 'Please login to access admin area');
+            }
 
-        return $next($request);
+            if (Auth::user()->role !== 'admin') {
+                Log::channel('stderr')->warning('Unauthorized admin access attempt', [
+                    'user_id' => Auth::id(),
+                    'ip' => $request->ip()
+                ]);
+                return redirect()->route('home')->with('error', 'You do not have permission to access this area');
+            }
+
+            return $next($request);
+        } catch (\Throwable $e) {
+            Log::channel('stderr')->error('Admin middleware error: ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Authentication error. Please login again.');
+        }
     }
 }

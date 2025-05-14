@@ -6,6 +6,7 @@ use App\Models\News;
 use App\Models\Category;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class NewsRepository
 {
@@ -121,7 +122,15 @@ class NewsRepository
      */
     public function getTodayNewsCount(): int
     {
-        return News::whereDate('created_at', today())->count();
+         try {
+            // Simpan hasil dalam cache untuk mengurangi query database
+            return Cache::remember('today_news_count', 60, function () {
+                return News::whereDate('created_at', today())->count();
+            });
+        } catch (\Throwable $e) {
+            // Fallback jika error
+            return 0;
+        }
     }
 
     /**
