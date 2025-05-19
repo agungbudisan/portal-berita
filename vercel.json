@@ -8,8 +8,8 @@
         { "source": "/build/(.*)", "destination": "/public/build/$1" },
         { "source": "/assets/(.*)", "destination": "/public/assets/$1" },
         { "source": "/(css|js|images|fonts)/(.*)", "destination": "/public/$1/$2" },
-        { "source": "/admin(/?.*)", "destination": "/api/admin.php" },
-        { "source": "/(.*)", "destination": "/api/index.php" }
+        { "source": "/admin(/?.*)", "destination": "/public/admin.php" },
+        { "source": "/(.*)", "destination": "/public/index.php" }
     ],
     "public": true,
     "outputDirectory": "public",
