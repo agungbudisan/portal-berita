@@ -4,12 +4,12 @@
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.6.0" }
     },
-    "routes": [
-        { "src": "/build/(.*)", "dest": "/public/build/$1" },
-        { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
-        { "src": "/(css|js|images|fonts)/(.*)", "dest": "/public/$1/$2" },
-        { "src": "/admin(/?.*)", "dest": "/api/admin.php" },
-        { "src": "/(.*)", "dest": "/api/index.php" }
+    "rewrites": [
+        { "source": "/build/(.*)", "destination": "/public/build/$1" },
+        { "source": "/assets/(.*)", "destination": "/public/assets/$1" },
+        { "source": "/(css|js|images|fonts)/(.*)", "destination": "/public/$1/$2" },
+        { "source": "/admin(/?.*)", "dest": "/api/admin.php" },
+        { "source": "/(.*)", "destination": "/api/index.php" }
     ],
     "public": true,
     "outputDirectory": "public",
