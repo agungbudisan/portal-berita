@@ -11,7 +11,7 @@
         <div class="hero-section">
             <div class="row">
                 <div class="col-md-5">
-                    <div class="rounded" style="height: 240px; background-image: url('{{ $featuredNews->image_url ? $featurednews->image_url : asset('images/placeholder.jpg') }}'); background-size: cover; background-position: center;"></div>
+                    <div class="rounded" style="height: 240px; background-image: url('{{ $featuredNews->image_url ? $featuredNews->image_url : asset('images/placeholder.jpg') }}'); background-size: cover; background-position: center;"></div>
                 </div>
                 <div class="col-md-7">
                     <div class="category-badge">{{ $featuredNews->category->name }}</div>
