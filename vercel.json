@@ -5,25 +5,15 @@
         "api/index.php": { "runtime": "vercel-php@0.6.0" },
         "api/admin.php": { "runtime": "vercel-php@0.6.0" }
     },
-    "rewrites": [
-        { "source": "/build/(.*)", "destination": "/public/build/$1" },
-        { "source": "/assets/(.*)", "destination": "/public/assets/$1" },
-        { "source": "/(css|js|images|fonts)/(.*)", "destination": "/public/$1/$2" },
-        { "source": "/admin(/?.*)", "destination": "/api/admin.php" },
-        { "source": "/(.*)", "destination": "/api/index.php" }
+    "routes": [
+        { "src": "/build/(.*)", "dest": "/public/build/$1" },
+        { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+        { "src": "/(css|js|images|fonts)/(.*)", "dest": "/public/$1/$2" },
+        { "src": "/admin(/?.*)", "dest": "/api/admin.php" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
     "outputDirectory": "public",
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [
-                { "key": "Content-Type", "value": "text/html; charset=UTF-8" },
-                { "key": "Content-Security-Policy", "value": "upgrade-insecure-requests" },
-                { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" }
-            ]
-        }
-    ],
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
