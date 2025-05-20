@@ -124,7 +124,7 @@ class NewsController extends Controller
         $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
 
         // Konfigurasi cache
-        $cachePath = storage_path('app/purifier');
+        $cachePath = sys_get_temp_dir() . '/purifier';
         if (!file_exists($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
