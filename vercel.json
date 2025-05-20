@@ -2,14 +2,15 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.6.0" }
+        "api/index.php": { "runtime": "vercel-php@0.6.0" },
+        "api/admin.php": { "runtime": "vercel-php@0.6.0" }
     },
     "rewrites": [
         { "source": "/build/(.*)", "destination": "/public/build/$1" },
         { "source": "/assets/(.*)", "destination": "/public/assets/$1" },
         { "source": "/(css|js|images|fonts)/(.*)", "destination": "/public/$1/$2" },
-        { "source": "/admin(/?.*)", "destination": "/public/admin.php" },
-        { "source": "/(.*)", "destination": "/public/index.php" }
+        { "source": "/admin(/?.*)", "destination": "/api/admin.php" },
+        { "source": "/(.*)", "destination": "/api/index.php" }
     ],
     "public": true,
     "outputDirectory": "public",
@@ -17,6 +18,7 @@
         {
             "source": "/(.*)",
             "headers": [
+                { "key": "Content-Type", "value": "text/html; charset=UTF-8" },
                 { "key": "Content-Security-Policy", "value": "upgrade-insecure-requests" },
                 { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" }
             ]
@@ -24,7 +26,7 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "true",
+        "APP_DEBUG": "false",
         "APP_URL": "https://portal-berita-winninews.vercel.app",
         "APP_KEY": "base64:uBG7mYGh40XAkGejm7lueM6Souqn1TFlM+oMyIhola0=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
