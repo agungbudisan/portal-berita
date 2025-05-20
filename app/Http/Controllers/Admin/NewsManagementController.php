@@ -100,6 +100,7 @@ class NewsManagementController extends Controller
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url|max:1024',
             'status' => 'nullable|in:published,draft',
         ]);
 
@@ -134,6 +135,10 @@ class NewsManagementController extends Controller
                     ->withInput()
                     ->with('error', 'Gagal mengupload gambar: ' . $e->getMessage());
             }
+        } elseif (!empty($validated['image_url'])) {
+            // Jika ada image_url dari API
+            $newsData['image_url'] = $validated['image_url'];
+            $newsData['cloudinary_public_id'] = null; // Tidak ada public ID dari Cloudinary
         }
 
         News::create($newsData);
