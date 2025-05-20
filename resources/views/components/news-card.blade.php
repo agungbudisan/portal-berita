@@ -1,6 +1,6 @@
 <div class="news-card h-100">
-    <div class="news-card-img" style="background-image: url('{{ $news->image ? (Str::startsWith($news->image, 'http') ? $news->image : asset('storage/'.$news->image)) : asset('images/placeholder.jpg') }}');">
-        @if(!$news->image)
+    <div class="news-card-img" style="background-image: url('{{ $news->image_url ? $news->image_url : asset('images/placeholder.jpg') }}');">
+        @if(!$news->image_url)
             <span><i class="bi bi-image me-2"></i>Gambar Berita</span>
         @endif
 

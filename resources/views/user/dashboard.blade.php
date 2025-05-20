@@ -153,7 +153,7 @@
                                 'news_id' => $bookmark->news_id,
                                 'title' => $bookmark->news->title,
                                 'content' => Str::limit(strip_tags($bookmark->news->content), 80),
-                                'image' => $bookmark->news->image ? asset('storage/'.$bookmark->news->image) : asset('images/placeholder.jpg'),
+                                'image' => $bookmark->news->image_url ? $news->image_url : asset('images/placeholder.jpg'),
                                 'category' => $bookmark->news->category->name,
                                 'url' => $bookmark->news->source_url ? $bookmark->news->source_url : route('news.show', $bookmark->news),
                                 'external' => (bool)$bookmark->news->source_url,

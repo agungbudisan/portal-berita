@@ -7,7 +7,7 @@ use App\Models\News;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class NewsManagementController extends Controller
 {
@@ -106,7 +106,7 @@ class NewsManagementController extends Controller
         $slug = Str::slug($validated['title']);
         $uniqueSlug = $this->getUniqueSlug($slug);
 
-        $news = new News([
+        $newsData = [
             'title' => $validated['title'],
             'slug' => $uniqueSlug,
             'content' => $validated['content'],
@@ -114,13 +114,29 @@ class NewsManagementController extends Controller
             'source' => $validated['source'] ?? 'WinniNews',
             'status' => $validated['status'] ?? 'published',
             'published_at' => ($validated['status'] ?? 'published') === 'published' ? now() : null,
-        ]);
+        ];
 
         if ($request->hasFile('image')) {
-            $news->image = $request->file('image')->store('news', 'public');
+            try {
+                $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
+                    'folder' => 'winninews/news',
+                    'transformation' => [
+                        'width' => 800,
+                        'height' => 600,
+                        'crop' => 'limit'
+                    ]
+                ]);
+
+                $newsData['image_url'] = $uploadedFile->getSecurePath();
+                $newsData['cloudinary_public_id'] = $uploadedFile->getPublicId();
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Gagal mengupload gambar: ' . $e->getMessage());
+            }
         }
 
-        $news->save();
+        News::create($newsData);
 
         return redirect()->route('admin.news.index')
             ->with('success', 'Berita berhasil ditambahkan.');
@@ -146,6 +162,7 @@ class NewsManagementController extends Controller
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
             'status' => 'nullable|in:published,draft',
+            'remove_image' => 'nullable|boolean',
         ]);
 
         // Update slug hanya jika judul berubah
@@ -161,23 +178,49 @@ class NewsManagementController extends Controller
         $news->source = $validated['source'] ?? $news->source;
         $news->status = $validated['status'] ?? $news->status;
 
-        // Update published_at hanya jika status berubah dari draft ke published
+        // Update published_at
         if ($news->status === 'draft' && $validated['status'] === 'published') {
             $news->published_at = now();
-        }
-
-        // Jika status berubah dari published ke draft, set published_at ke null
-        if ($news->status === 'published' && $validated['status'] === 'draft') {
+        } elseif ($news->status === 'published' && $validated['status'] === 'draft') {
             $news->published_at = null;
         }
 
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
-            if ($news->image) {
-                Storage::disk('public')->delete($news->image);
+        // Handle penghapusan gambar
+        if ($request->has('remove_image') && $request->remove_image && $news->cloudinary_public_id) {
+            try {
+                Cloudinary::destroy($news->cloudinary_public_id);
+                $news->image_url = null;
+                $news->cloudinary_public_id = null;
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->with('error', 'Gagal menghapus gambar: ' . $e->getMessage());
             }
+        }
 
-            $news->image = $request->file('image')->store('news', 'public');
+        // Handle upload gambar baru
+        if ($request->hasFile('image')) {
+            try {
+                // Hapus gambar lama jika ada
+                if ($news->cloudinary_public_id) {
+                    Cloudinary::destroy($news->cloudinary_public_id);
+                }
+
+                $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
+                    'folder' => 'winninews/news',
+                    'transformation' => [
+                        'width' => 800,
+                        'height' => 600,
+                        'crop' => 'limit'
+                    ]
+                ]);
+
+                $news->image_url = $uploadedFile->getSecurePath();
+                $news->cloudinary_public_id = $uploadedFile->getPublicId();
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Gagal mengupload gambar: ' . $e->getMessage());
+            }
         }
 
         $news->save();
@@ -188,15 +231,20 @@ class NewsManagementController extends Controller
 
     public function destroy(News $news)
     {
-        // Hapus gambar jika ada
-        if ($news->image) {
-            Storage::disk('public')->delete($news->image);
+        try {
+            // Hapus gambar dari Cloudinary jika ada
+            if ($news->cloudinary_public_id) {
+                Cloudinary::destroy($news->cloudinary_public_id);
+            }
+
+            $news->delete();
+
+            return redirect()->route('admin.news.index')
+                ->with('success', 'Berita berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.news.index')
+                ->with('error', 'Gagal menghapus berita: ' . $e->getMessage());
         }
-
-        $news->delete();
-
-        return redirect()->route('admin.news.index')
-            ->with('success', 'Berita berhasil dihapus.');
     }
 
     private function getUniqueSlug($slug, $ignoreId = null)
@@ -230,11 +278,23 @@ class NewsManagementController extends Controller
         ]);
 
         if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('news/content', 'public');
+            try {
+                $uploadedFile = Cloudinary::upload($request->file('file')->getRealPath(), [
+                    'folder' => 'winninews/editor',
+                    'transformation' => [
+                        'width' => 1200,
+                        'crop' => 'limit'
+                    ]
+                ]);
 
-            return response()->json([
-                'url' => asset('storage/' . $path)
-            ]);
+                return response()->json([
+                    'url' => $uploadedFile->getSecurePath()
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => 'Gagal mengupload gambar: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
         return response()->json([

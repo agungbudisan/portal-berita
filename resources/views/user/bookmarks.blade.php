@@ -63,8 +63,8 @@
                             <!-- Left: Image or Placeholder -->
                             <div class="col-md-3 col-lg-2 mb-3 mb-md-0">
                                 <div class="news-image position-relative h-100 rounded">
-                                    <div class="bookmark-image h-100 rounded" style="background-image: url('{{ $bookmark->news->image ? asset('storage/'.$bookmark->news->image) : asset('images/placeholder.jpg') }}'); background-size: cover; background-position: center; min-height: 120px;">
-                                        @if(!$bookmark->news->image)
+                                    <div class="bookmark-image h-100 rounded" style="background-image: url('{{ $bookmark->news->image_url ? $bookmark->news->image_url : asset('images/placeholder.jpg') }}'); background-size: cover; background-position: center; min-height: 120px;">
+                                        @if(!$bookmark->news->image_url)
                                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-light rounded">
                                                 <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
                                             </div>

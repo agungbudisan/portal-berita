@@ -82,12 +82,7 @@
             @if($news->image)
                 @if(Str::startsWith($news->image, ['http://', 'https://']))
                     <div class="mb-4 text-center">
-                        <img src="{{ $news->image }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
-                        <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
-                    </div>
-                @else
-                    <div class="mb-4 text-center">
-                        <img src="{{ asset('storage/'.$news->image) }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
+                        <img src="{{ $news->image_url }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
                         <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
                     </div>
                 @endif

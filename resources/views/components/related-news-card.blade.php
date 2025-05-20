@@ -2,7 +2,7 @@
     <div class="row g-0 h-100">
         <div class="col-4">
             <div class="h-100 position-relative" style="min-height: 80px;">
-                <div class="news-card-img h-100" style="background-image: url('{{ $news->image ? (Str::startsWith($news->image, 'http') ? $news->image : asset('storage/'.$news->image)) : asset('images/placeholder.jpg') }}');">
+                <div class="news-card-img h-100" style="background-image: url('{{ $news->image_url ? $news->image_url : asset('images/placeholder.jpg') }}');">
                     @if(!$news->image)
                         <span>Gambar</span>
                     @endif

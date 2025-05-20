@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('content');
-            $table->text('image')->nullable();
+            $table->text('image_url')->nullable();
+            $table->string('cloudinary_public_id')->nullable();
             $table->string('source')->nullable();
             $table->string('source_url')->nullable();
             $table->enum('status', ['published', 'draft'])->default('published');
