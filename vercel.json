@@ -16,7 +16,7 @@
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_URL": "https://portal-berita-winninews.vercel.app",
         "APP_KEY": "base64:uBG7mYGh40XAkGejm7lueM6Souqn1TFlM+oMyIhola0=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
