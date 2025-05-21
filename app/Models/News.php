@@ -67,17 +67,7 @@ class News extends Model
 
     public function getImageUrlAttribute()
     {
-        $value = $this->getAttributes()['image_url'] ?? null;
-
-        if (!$value) {
-            return asset('images/placeholder.jpg');
-        }
-
-        if (Str::startsWith($value, ['http://', 'https://'])) {
-            return $value;
-        }
-
-        return asset('storage/' . $value);
+        return $this->attributes['image_url'] ?? asset('images/placeholder.jpg');
     }
 
     public function getPurifiedContentAttribute()
