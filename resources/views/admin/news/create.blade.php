@@ -64,9 +64,9 @@
                             <h6 class="mb-0">Gambar Utama</h6>
                         </div>
                         <div class="card-body">
-                            <div class="text-center mb-3" id="image-preview-container">
-                                <img src="{{ asset('images/placeholder.jpg') }}" alt="Preview" class="img-fluid rounded"
-                                     id="image-preview" style="max-height: 200px; width: auto;">
+                            <div id="image-preview-container">
+                                <img src="{{ old('image_url') ?: asset('images/placeholder.jpg') }}" alt="Preview" class="img-fluid rounded"
+                                    id="image-preview" style="max-height: 200px; width: auto;">
                             </div>
 
                             <div class="mb-3">

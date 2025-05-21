@@ -80,13 +80,8 @@
                         <div class="card-body">
                             <div class="text-center mb-3">
                                 <div id="image-preview-container">
-                                    @if($news->image)
-                                        <img src="{{ $news->image_url }}" alt="{{ $news->title }}" class="img-fluid rounded"
-                                             id="image-preview" style="max-height: 200px; width: auto;">
-                                    @else
-                                        <img src="{{ asset('images/placeholder.jpg') }}" alt="Preview" class="img-fluid rounded"
-                                             id="image-preview" style="max-height: 200px; width: auto;">
-                                    @endif
+                                    <img src="{{ $news->image_url }}" alt="{{ $news->title }}" class="img-fluid rounded"
+                                        id="image-preview" style="max-height: 200px; width: auto;">
                                 </div>
                             </div>
 
@@ -103,7 +98,7 @@
 
                             <div class="mb-3">
                                 <label for="image_url" class="form-label">URL Gambar (opsional, untuk berita dari API)</label>
-                                <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url" name="image_url" value="{{ old('image_url') }}">
+                                <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url" name="image_url" value="{{ old('image_url', $news->image_url) }}">
                                 @error('image_url')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

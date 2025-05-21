@@ -99,7 +99,7 @@
                         <td>{{ $item->id }}</td>
                         <td>
                             <div class="d-flex">
-                                @if($item->image)
+                                @if($item->image_url)
                                 <div class="me-3">
                                     <img src="{{ $item->image_url }}" alt="{{ $item->title }}"
                                         class="rounded" style="width: 60px; height: 60px; object-fit: cover;">

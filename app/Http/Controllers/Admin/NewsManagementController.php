@@ -100,6 +100,7 @@ class NewsManagementController extends Controller
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url|max:1024',
             'status' => 'nullable|in:published,draft',
         ]);
 
@@ -124,6 +125,9 @@ class NewsManagementController extends Controller
 
             $newsData['image_url'] = $uploaded->getSecurePath();
             $newsData['cloudinary_public_id'] = $uploaded->getPublicId();
+        } elseif (!empty($validated['image_url'])) {
+            $newsData['image_url'] = $validated['image_url'];
+            $newsData['cloudinary_public_id'] = null;
         }
 
         News::create($newsData);
@@ -151,6 +155,7 @@ class NewsManagementController extends Controller
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url|max:1024',
             'status' => 'nullable|in:published,draft',
             'remove_image' => 'nullable|boolean',
         ]);
@@ -193,6 +198,14 @@ class NewsManagementController extends Controller
 
             $news->image_url = $uploaded->getSecurePath();
             $news->cloudinary_public_id = $uploaded->getPublicId();
+        } elseif (!empty($validated['image_url'])) {
+            // Jika admin mengganti dengan URL gambar (misal dari API)
+            if ($news->cloudinary_public_id) {
+                Cloudinary::destroy($news->cloudinary_public_id);
+            }
+
+            $newsData['image_url'] = $validated['image_url'];
+            $newsData['cloudinary_public_id'] = null;
         }
 
         $news->save();
