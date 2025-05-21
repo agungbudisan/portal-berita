@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Log;
 
 class NewsManagementController extends Controller
 {
@@ -119,15 +120,34 @@ class NewsManagementController extends Controller
 
         if ($request->hasFile('image')) {
             try {
-                $uploaded = Cloudinary::upload(
+                Log::info('Mulai upload gambar ke Cloudinary');
+
+                $result = Cloudinary::upload(
                     $request->file('image')->getRealPath(),
                     ['folder' => 'news']
-                )->getResult();
+                );
+
+                Log::info('Hasil upload: ' . json_encode($result));
+
+                // Periksa jika hasil valid
+                $uploaded = $result->getResult();
+
+                if (!$uploaded) {
+                    throw new \Exception('Hasil upload Cloudinary null');
+                }
+
+                Log::info('Hasil getResult(): ' . json_encode($uploaded));
 
                 $newsData['image_url'] = $uploaded['secure_url'] ?? null;
                 $newsData['cloudinary_public_id'] = $uploaded['public_id'] ?? null;
 
+                if (!$newsData['image_url'] || !$newsData['cloudinary_public_id']) {
+                    throw new \Exception('URL atau ID gambar kosong');
+                }
             } catch (\Throwable $e) {
+                Log::error('Error upload Cloudinary: ' . $e->getMessage());
+                Log::error('Stack trace: ' . $e->getTraceAsString());
+
                 return redirect()->back()->withInput()->withErrors([
                     'image' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()
                 ]);
@@ -185,20 +205,58 @@ class NewsManagementController extends Controller
         $news->status = $newStatus;
 
         if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
             if ($news->cloudinary_public_id) {
-                Cloudinary::destroy($news->cloudinary_public_id);
+                try {
+                    Cloudinary::destroy($news->cloudinary_public_id);
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal menghapus gambar lama: ' . $e->getMessage());
+                    // Lanjutkan proses upload meskipun gagal menghapus yang lama
+                }
             }
 
             try {
-                $uploaded = Cloudinary::upload(
-                    $request->file('image')->getRealPath(),
-                    ['folder' => 'news']
-                )->getResult();
+                // Tambahkan logging untuk debug
+                Log::info('Memulai proses upload gambar ke Cloudinary');
 
-                $news->image_url = $uploaded['secure_url'] ?? null;
-                $news->cloudinary_public_id = $uploaded['public_id'] ?? null;
+                // Generate timestamp untuk signed upload
+                $timestamp = time();
+
+                // Buat parameter signed upload
+                $params = [
+                    'folder' => 'news',
+                    'timestamp' => $timestamp,
+                    // Anda bisa menambahkan parameter lain seperti transformation jika diperlukan
+                ];
+
+                // Gunakan signedUpload jika tersedia di versi library Anda
+                // atau upload biasa dengan parameter timestamp
+                $result = Cloudinary::upload(
+                    $request->file('image')->getRealPath(),
+                    $params
+                );
+
+                // Log hasil upload untuk debugging
+                Log::info('Hasil upload raw: ' . json_encode($result));
+
+                // Ambil hasil dengan handling null
+                $uploaded = $result->getResult();
+
+                // Validasi hasil upload
+                if (!$uploaded || !isset($uploaded['secure_url']) || !isset($uploaded['public_id'])) {
+                    throw new \Exception('Hasil upload tidak valid: ' . json_encode($uploaded));
+                }
+
+                Log::info('Upload berhasil: ' . $uploaded['public_id']);
+
+                // Update model dengan URL dan public_id baru
+                $news->image_url = $uploaded['secure_url'];
+                $news->cloudinary_public_id = $uploaded['public_id'];
 
             } catch (\Throwable $e) {
+                Log::error('Cloudinary upload error: ' . $e->getMessage());
+                Log::error('Stack trace: ' . $e->getTraceAsString());
+
                 return redirect()->back()->withInput()->withErrors([
                     'image' => 'Gagal mengupload gambar ke Cloudinary: ' . $e->getMessage()
                 ]);
