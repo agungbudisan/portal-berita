@@ -67,15 +67,17 @@ class News extends Model
 
     public function getImageUrlAttribute()
     {
-        if (!$this->image_url) {
-            return asset('images/placeholder.jpg'); // Placeholder default
+        $value = $this->getAttributes()['image_url'] ?? null;
+
+        if (!$value) {
+            return asset('images/placeholder.jpg');
         }
 
-        if (Str::startsWith($this->image_url, ['http://', 'https://'])) {
-            return $this->image_url; // URL eksternal, gunakan langsung
+        if (Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
         }
 
-        return asset('storage/' . $this->image_url); // File lokal, gunakan storage
+        return asset('storage/' . $value);
     }
 
     public function getPurifiedContentAttribute()
