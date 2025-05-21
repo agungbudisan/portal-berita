@@ -67,7 +67,11 @@ class News extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->attributes['image_url'] ?? asset('images/placeholder.jpg');
+        // Hindari error offset null
+        if (array_key_exists('image_url', $this->attributes) && $this->attributes['image_url']) {
+            return $this->attributes['image_url'];
+        }
+        return asset('images/placeholder.jpg');
     }
 
     public function getPurifiedContentAttribute()
