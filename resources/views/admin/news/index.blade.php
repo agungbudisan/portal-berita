@@ -99,12 +99,10 @@
                         <td>{{ $item->id }}</td>
                         <td>
                             <div class="d-flex">
-                                @if($item->image_url)
                                 <div class="me-3">
                                     <img src="{{ $item->image_url }}" alt="{{ $item->title }}"
                                         class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
                                 </div>
-                                @endif
                                 <div>
                                     <h6 class="mb-1">{{ $item->title }}</h6>
                                     <div class="d-flex align-items-center small text-muted">
