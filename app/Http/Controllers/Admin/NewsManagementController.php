@@ -122,11 +122,10 @@ class NewsManagementController extends Controller
                 $request->file('image')->getRealPath(),
                 ['folder' => 'news']
             );
-
             $newsData['image_url'] = $uploaded->getSecurePath();
             $newsData['cloudinary_public_id'] = $uploaded->getPublicId();
-        } elseif (!empty($validated['image_url'])) {
-            $newsData['image_url'] = $validated['image_url'];
+        } else {
+            $newsData['image_url'] = $validated['image_url'] ?? null;
             $newsData['cloudinary_public_id'] = null;
         }
 
@@ -204,8 +203,8 @@ class NewsManagementController extends Controller
                 Cloudinary::destroy($news->cloudinary_public_id);
             }
 
-            $newsData['image_url'] = $validated['image_url'];
-            $newsData['cloudinary_public_id'] = null;
+            $news->image_url = $validated['image_url'];
+            $news->cloudinary_public_id = null;
         }
 
         $news->save();
