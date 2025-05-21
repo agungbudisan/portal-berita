@@ -122,8 +122,17 @@ class NewsManagementController extends Controller
                 $request->file('image')->getRealPath(),
                 ['folder' => 'news']
             );
-            $newsData['image_url'] = $uploaded->getSecurePath();
-            $newsData['cloudinary_public_id'] = $uploaded->getPublicId();
+
+            dd($uploaded);
+
+            // CEK: Pastikan $uploaded tidak null atau error
+            if ($uploaded && $uploaded->getSecurePath() && $uploaded->getPublicId()) {
+                $newsData['image_url'] = $uploaded->getSecurePath();
+                $newsData['cloudinary_public_id'] = $uploaded->getPublicId();
+            } else {
+                // Cloudinary gagal upload! Handle error di sini
+                return redirect()->back()->withInput()->withErrors(['image' => 'Gagal mengupload gambar ke Cloudinary.']);
+            }
         } else {
             $newsData['image_url'] = $validated['image_url'] ?? null;
             $newsData['cloudinary_public_id'] = null;
@@ -177,34 +186,34 @@ class NewsManagementController extends Controller
 
         $news->status = $validated['status'] ?? $news->status;
 
-        if ($request->boolean('remove_image')) {
-            if ($news->cloudinary_public_id) {
-                Cloudinary::destroy($news->cloudinary_public_id);
-            }
-            $news->image_url = null;
-            $news->cloudinary_public_id = null;
-        }
-
+        // Handle Gambar Baru
         if ($request->hasFile('image')) {
+            // Hapus gambar lama jika dari Cloudinary
             if ($news->cloudinary_public_id) {
                 Cloudinary::destroy($news->cloudinary_public_id);
             }
-
             $uploaded = Cloudinary::upload(
                 $request->file('image')->getRealPath(),
                 ['folder' => 'news']
             );
-
-            $news->image_url = $uploaded->getSecurePath();
-            $news->cloudinary_public_id = $uploaded->getPublicId();
-        } elseif (!empty($validated['image_url'])) {
-            // Jika admin mengganti dengan URL gambar (misal dari API)
-            if ($news->cloudinary_public_id) {
-                Cloudinary::destroy($news->cloudinary_public_id);
+            // Cek hasil upload
+            if ($uploaded && $uploaded->getSecurePath() && $uploaded->getPublicId()) {
+                $news->image_url = $uploaded->getSecurePath();
+                $news->cloudinary_public_id = $uploaded->getPublicId();
+            } else {
+                return redirect()->back()->withInput()->withErrors(['image' => 'Gagal mengupload gambar ke Cloudinary.']);
             }
-
-            $news->image_url = $validated['image_url'];
-            $news->cloudinary_public_id = null;
+        } else {
+            // Hanya update image_url jika field ini dikirim (misal user mengganti URL)
+            if (array_key_exists('image_url', $validated)) {
+                // Hapus gambar lama dari Cloudinary jika sebelumnya pernah upload file
+                if ($news->cloudinary_public_id) {
+                    Cloudinary::destroy($news->cloudinary_public_id);
+                }
+                $news->image_url = $validated['image_url'];
+                $news->cloudinary_public_id = null;
+            }
+            // Jika user tidak mengubah image/image_url, biarkan seperti sekarang
         }
 
         $news->save();
