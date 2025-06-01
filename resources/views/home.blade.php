@@ -91,17 +91,17 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <!-- Search -->
-        <div class="sidebar-widget">
-            <h5 class="wgt-title mb-3">Pencarian</h5>
+        <div class="bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Pencarian</h5>
             <div x-data="{ query: '' }">
                 <form action="{{ route('news.search') }}" method="GET" class="search-form">
                     <div class="input-group">
                         <input type="text"
-                               name="query"
-                               x-model="query"
-                               class="form-control"
-                               placeholder="Cari berita..."
-                               value="{{ request('query') }}">
+                            name="query"
+                            x-model="query"
+                            class="form-control"
+                            placeholder="Cari berita..."
+                            value="{{ request('query') }}">
                         <button class="btn btn-primary"
                                 type="submit"
                                 x-bind:disabled="query.length < 3">
@@ -116,31 +116,37 @@
         </div>
 
         <!-- Popular News -->
-        <div class="sidebar-widget">
-            <h5 class="wgt-title mb-3">Berita Populer</h5>
+        <div class="bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Populer</h5>
             <div class="list-group list-group-flush">
-                @foreach($popularNews as $index => $news)
-                <a href="{{ route('news.show', $news) }}" class="list-group-item list-group-item-action px-0">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0 me-3 text-primary fw-bold">
-                            #{{ $index + 1 }}
+                @foreach($popularNews as $index => $popular)
+                <a href="{{ $popular->source_url ? $popular->source_url : route('news.show', $popular) }}"
+                class="list-group-item list-group-item-action border-0 py-3 px-0"
+                {{ $popular->source_url ? 'target="_blank"' : '' }}>
+                    <div class="row g-0">
+                        <div class="col-2 d-flex align-items-center">
+                            <span class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                style="width: 30px; height: 30px;">{{ $index + 1 }}</span>
                         </div>
-                        <div>
-                            <h6 class="mb-1">{{ $news->title }}</h6>
-                            <div class="d-flex align-items-center">
-                                <small class="text-muted">
+                        <div class="col-10">
+                            <h6 class="mb-1 text-truncate-2">
+                                {{ $popular->title }}
+                                @if($popular->source_url)
+                                    <i class="bi bi-box-arrow-up-right text-muted small"></i>
+                                @endif
+                            </h6>
+                            <div class="d-flex align-items-center small">
+                                <span class="text-muted me-2">
+                                    <i class="bi bi-eye me-1"></i> {{ number_format($popular->views_count) }}
+                                </span>
+                                <span class="text-muted">
                                     <i class="bi bi-clock me-1"></i>
-                                    @if($news->published_at)
-                                        {{ $news->published_at->diffForHumans() }}
+                                    @if($popular->published_at)
+                                        {{ $popular->published_at->diffForHumans() }}
                                     @else
                                         Baru saja
                                     @endif
-                                </small>
-                                @if($news->source)
-                                    <small class="text-muted ms-2">
-                                        <span class="mx-1">•</span> {{ $news->source }}
-                                    </small>
-                                @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -150,18 +156,28 @@
         </div>
 
         <!-- Categories -->
-        <div class="sidebar-widget">
-            <h5 class="wgt-title mb-3">Kategori</h5>
+        <div class="bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori</h5>
             <div class="list-group list-group-flush">
-                @foreach($categories as $category)
-                <a href="{{ route('category.show', $category) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                @foreach(\App\Models\Category::withCount(['news' => function($query) {
+                    $query->where('status', 'published')->whereNotNull('published_at');
+                }])->orderBy('news_count', 'desc')->take(5)->get() as $category)
+                <a href="{{ route('category.show', $category) }}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-2 px-0">
                     <span>
-                        <i class="bi bi-tag me-2"></i>
+                        <i class="bi bi-tag-fill me-2 text-muted"></i>
                         {{ $category->name }}
                     </span>
-                    <span class="badge bg-primary rounded-pill">{{ $category->news_count }}</span>
+                    <span class="badge bg-secondary rounded-pill">
+                        {{ $category->news_count }}
+                    </span>
                 </a>
                 @endforeach
+                <div class="text-center mt-2">
+                    <a href="{{ route('category.index') }}" class="btn btn-sm btn-outline-primary">
+                        Lihat Semua Kategori
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -169,4 +185,12 @@
         @include('components.guest-login-prompt')
     </div>
 </div>
+<style>
+    .text-truncate-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+</style>
 @endsection
