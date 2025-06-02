@@ -79,18 +79,18 @@
             </div>
 
             <!-- Featured Image -->
-            @if($news->image)
-                @if(Str::startsWith($news->image, ['http://', 'https://']))
-                    <div class="mb-4 text-center">
-                        <img src="{{ $news->image_url }}" class="img-fluid rounded shadow-sm" alt="{{ $news->title }}">
-                        <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
-                    </div>
-                @endif
+            @if($news->image_url)
+                <figure class="mb-4 text-center">
+                    <img src="{{ $news->image_url }}"
+                        class="img-fluid rounded shadow-sm"
+                        alt="{{ $news->title }}">
+                    <figcaption class="text-muted small mt-2">{{ $news->title }}</figcaption>
+                </figure>
             @else
-            <div class="mb-4 rounded bg-light p-5 text-center shadow-sm">
-                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                <p class="text-muted mt-2">Gambar Utama Berita</p>
-            </div>
+                <div class="mb-4 rounded bg-light p-5 text-center shadow-sm">
+                    <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                    <p class="text-muted mt-2">Gambar Utama Berita</p>
+                </div>
             @endif
 
             <!-- News Content -->
