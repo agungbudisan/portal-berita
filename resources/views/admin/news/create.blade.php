@@ -64,7 +64,7 @@
                             <h6 class="mb-0">Gambar Utama</h6>
                         </div>
                         <div class="card-body">
-                            <div id="image-preview-container">
+                            {{-- <div id="image-preview-container">
                                 <img src="{{ old('image_url') ?: asset('images/placeholder.jpg') }}" alt="Preview" class="img-fluid rounded"
                                     id="image-preview" style="max-height: 200px; width: auto;">
                             </div>
@@ -78,14 +78,18 @@
                                 @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="mb-3">
-                                <label for="image_url" class="form-label">URL Gambar (opsional, untuk berita dari API)</label>
-                                <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url" name="image_url" value="{{ old('image_url') }}">
+                                <label for="image_url" class="form-label">URL Gambar <span class="text-danger">*</span></label>
+                                <input type="url" class="form-control @error('image_url') is-invalid @enderror" id="image_url" name="image_url" value="{{ old('image_url') }}" required oninput="previewImageUrl()">
                                 @error('image_url')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+                            <div id="image-preview-container" class="mt-2">
+                                <img src="{{ old('image_url') ?: asset('images/placeholder.jpg') }}" alt="Preview" class="img-fluid rounded"
+                                    id="image-preview" style="max-height: 200px; width: auto;">
                             </div>
                         </div>
                     </div>
@@ -139,6 +143,12 @@
 
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function previewImageUrl() {
+        const url = document.getElementById('image_url').value;
+        const preview = document.getElementById('image-preview');
+        preview.src = url !== '' ? url : '{{ asset('images/placeholder.jpg') }}';
     }
 
     // Inisialisasi Summernote

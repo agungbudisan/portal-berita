@@ -100,7 +100,7 @@ class NewsManagementController extends Controller
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            // 'image' => 'nullable|image|max:2048',
             'image_url' => 'nullable|url|max:1024',
             'status' => 'nullable|in:published,draft',
         ]);
@@ -116,43 +116,45 @@ class NewsManagementController extends Controller
             'source' => $validated['source'] ?? 'WinniNews',
             'status' => $validated['status'] ?? 'published',
             'published_at' => ($validated['status'] ?? 'published') === 'published' ? now() : null,
+            'image_url' => $validated['image_url'],
+            'cloudinary_public_id' => null,
         ];
 
-        if ($request->hasFile('image')) {
-            try {
-                Log::info('Mulai upload gambar ke Cloudinary');
+        // if ($request->hasFile('image')) {
+        //     try {
+        //         Log::info('Mulai upload gambar ke Cloudinary');
 
-                $result = Cloudinary::upload(
-                    $request->file('image')->getRealPath(),
-                    ['folder' => 'news']
-                );
+        //         $result = Cloudinary::upload(
+        //             $request->file('image')->getRealPath(),
+        //             ['folder' => 'news']
+        //         );
 
-                Log::info('Hasil upload: ' . json_encode($result));
+        //         Log::info('Hasil upload: ' . json_encode($result));
 
-                // Periksa jika hasil valid
-                $uploaded = $result->getResult();
+        //         // Periksa jika hasil valid
+        //         $uploaded = $result->getResult();
 
-                if (!$uploaded) {
-                    throw new \Exception('Hasil upload Cloudinary null');
-                }
+        //         if (!$uploaded) {
+        //             throw new \Exception('Hasil upload Cloudinary null');
+        //         }
 
-                Log::info('Hasil getResult(): ' . json_encode($uploaded));
+        //         Log::info('Hasil getResult(): ' . json_encode($uploaded));
 
-                $newsData['image_url'] = $uploaded['secure_url'] ?? null;
-                $newsData['cloudinary_public_id'] = $uploaded['public_id'] ?? null;
+        //         $newsData['image_url'] = $uploaded['secure_url'] ?? null;
+        //         $newsData['cloudinary_public_id'] = $uploaded['public_id'] ?? null;
 
-                if (!$newsData['image_url'] || !$newsData['cloudinary_public_id']) {
-                    throw new \Exception('URL atau ID gambar kosong');
-                }
-            } catch (\Throwable $e) {
-                Log::error('Error upload Cloudinary: ' . $e->getMessage());
-                Log::error('Stack trace: ' . $e->getTraceAsString());
+        //         if (!$newsData['image_url'] || !$newsData['cloudinary_public_id']) {
+        //             throw new \Exception('URL atau ID gambar kosong');
+        //         }
+        //     } catch (\Throwable $e) {
+        //         Log::error('Error upload Cloudinary: ' . $e->getMessage());
+        //         Log::error('Stack trace: ' . $e->getTraceAsString());
 
-                return redirect()->back()->withInput()->withErrors([
-                    'image' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()
-                ]);
-            }
-        }
+        //         return redirect()->back()->withInput()->withErrors([
+        //             'image' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()
+        //         ]);
+        //     }
+        // }
 
         News::create($newsData);
 
@@ -178,10 +180,10 @@ class NewsManagementController extends Controller
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'source' => 'nullable|string|max:255',
-            'image' => 'nullable|image|max:2048',
+            // 'image' => 'nullable|image|max:2048',
             'image_url' => 'nullable|url|max:1024',
             'status' => 'nullable|in:published,draft',
-            'remove_image' => 'nullable|boolean',
+            // 'remove_image' => 'nullable|boolean',
         ]);
 
         // Slug update
@@ -194,6 +196,8 @@ class NewsManagementController extends Controller
         $news->content = $validated['content'];
         $news->category_id = $validated['category_id'];
         $news->source = $validated['source'] ?? $news->source;
+        $news->image_url = $validated['image_url'];
+        $news->cloudinary_public_id = null;
 
         // Status dan published_at update
         $newStatus = $validated['status'] ?? $news->status;
@@ -204,64 +208,64 @@ class NewsManagementController extends Controller
         }
         $news->status = $newStatus;
 
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
-            if ($news->cloudinary_public_id) {
-                try {
-                    Cloudinary::destroy($news->cloudinary_public_id);
-                } catch (\Throwable $e) {
-                    Log::warning('Gagal menghapus gambar lama: ' . $e->getMessage());
-                    // Lanjutkan proses upload meskipun gagal menghapus yang lama
-                }
-            }
+        // if ($request->hasFile('image')) {
+        //     // Hapus gambar lama jika ada
+        //     if ($news->cloudinary_public_id) {
+        //         try {
+        //             Cloudinary::destroy($news->cloudinary_public_id);
+        //         } catch (\Throwable $e) {
+        //             Log::warning('Gagal menghapus gambar lama: ' . $e->getMessage());
+        //             // Lanjutkan proses upload meskipun gagal menghapus yang lama
+        //         }
+        //     }
 
-            try {
-                // Tambahkan logging untuk debug
-                Log::info('Memulai proses upload gambar ke Cloudinary');
+        //     try {
+        //         // Tambahkan logging untuk debug
+        //         Log::info('Memulai proses upload gambar ke Cloudinary');
 
-                // Generate timestamp untuk signed upload
-                $timestamp = time();
+        //         // Generate timestamp untuk signed upload
+        //         $timestamp = time();
 
-                // Buat parameter signed upload
-                $params = [
-                    'folder' => 'news',
-                    'timestamp' => $timestamp,
-                    // Anda bisa menambahkan parameter lain seperti transformation jika diperlukan
-                ];
+        //         // Buat parameter signed upload
+        //         $params = [
+        //             'folder' => 'news',
+        //             'timestamp' => $timestamp,
+        //             // Anda bisa menambahkan parameter lain seperti transformation jika diperlukan
+        //         ];
 
-                // Gunakan signedUpload jika tersedia di versi library Anda
-                // atau upload biasa dengan parameter timestamp
-                $result = Cloudinary::upload(
-                    $request->file('image')->getRealPath(),
-                    $params
-                );
+        //         // Gunakan signedUpload jika tersedia di versi library Anda
+        //         // atau upload biasa dengan parameter timestamp
+        //         $result = Cloudinary::upload(
+        //             $request->file('image')->getRealPath(),
+        //             $params
+        //         );
 
-                // Log hasil upload untuk debugging
-                Log::info('Hasil upload raw: ' . json_encode($result));
+        //         // Log hasil upload untuk debugging
+        //         Log::info('Hasil upload raw: ' . json_encode($result));
 
-                // Ambil hasil dengan handling null
-                $uploaded = $result->getResult();
+        //         // Ambil hasil dengan handling null
+        //         $uploaded = $result->getResult();
 
-                // Validasi hasil upload
-                if (!$uploaded || !isset($uploaded['secure_url']) || !isset($uploaded['public_id'])) {
-                    throw new \Exception('Hasil upload tidak valid: ' . json_encode($uploaded));
-                }
+        //         // Validasi hasil upload
+        //         if (!$uploaded || !isset($uploaded['secure_url']) || !isset($uploaded['public_id'])) {
+        //             throw new \Exception('Hasil upload tidak valid: ' . json_encode($uploaded));
+        //         }
 
-                Log::info('Upload berhasil: ' . $uploaded['public_id']);
+        //         Log::info('Upload berhasil: ' . $uploaded['public_id']);
 
-                // Update model dengan URL dan public_id baru
-                $news->image_url = $uploaded['secure_url'];
-                $news->cloudinary_public_id = $uploaded['public_id'];
+        //         // Update model dengan URL dan public_id baru
+        //         $news->image_url = $uploaded['secure_url'];
+        //         $news->cloudinary_public_id = $uploaded['public_id'];
 
-            } catch (\Throwable $e) {
-                Log::error('Cloudinary upload error: ' . $e->getMessage());
-                Log::error('Stack trace: ' . $e->getTraceAsString());
+        //     } catch (\Throwable $e) {
+        //         Log::error('Cloudinary upload error: ' . $e->getMessage());
+        //         Log::error('Stack trace: ' . $e->getTraceAsString());
 
-                return redirect()->back()->withInput()->withErrors([
-                    'image' => 'Gagal mengupload gambar ke Cloudinary: ' . $e->getMessage()
-                ]);
-            }
-        }
+        //         return redirect()->back()->withInput()->withErrors([
+        //             'image' => 'Gagal mengupload gambar ke Cloudinary: ' . $e->getMessage()
+        //         ]);
+        //     }
+        // }
 
         $news->save();
 
