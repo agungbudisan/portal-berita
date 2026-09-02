@@ -1,100 +1,195 @@
 # WinniNews - Portal Berita dengan Laravel
 
-Aplikasi portal berita yang terintegrasi dengan API Berita, dibangun dengan Laravel 12+ dan Bootstrap 5.
+Aplikasi portal berita modern yang terintegrasi dengan API Berita, dibangun dengan Laravel 12+ dan Bootstrap 5. Platform ini menyediakan pengalaman membaca berita yang responsif dengan fitur lengkap untuk admin dan user.
 
-## Fitur
+## 🚀 Fitur Utama
 
-- Integrasi dengan API Berita eksternal
-- Portal berita responsif
-- Dashboard Admin untuk manajemen konten
-- Dashboard User untuk bookmark dan komentar
-- Sistem authentikasi multi-role (admin, user)
+- ✨ Integrasi dengan API Berita eksternal untuk konten yang selalu terbaru
+- 📱 Portal berita responsif yang optimal di semua perangkat
+- 🔐 Dashboard Admin untuk manajemen konten berita
+- 👤 Dashboard User untuk bookmark, komentar, dan preferensi
+- 🔑 Sistem autentikasi multi-role (Admin, User)
+- 📅 Penjadwalan otomatis untuk fetch berita (Cron Jobs)
+- 💾 Repository pattern untuk clean code
+- 🎨 Desain modern dengan Bootstrap 5
 
-## Instalasi
+## 📋 Persyaratan Sistem
 
-1. Clone repository
-   ```
-   git clone https://your-repository-url/winninews.git
-   cd winninews
-   ```
+- PHP 8.3 atau lebih tinggi
+- Composer
+- Node.js & npm
+- MySQL/MariaDB atau PostgreSQL
+- Laravel 12+
 
-2. Install dependensi
-   ```
-   composer install
-   npm install
-   ```
+## 🛠️ Instalasi
 
-3. Setup lingkungan
-   ```
-   cp .env.example .env
-   php artisan key:generate
-   ```
+### 1. Clone Repository
 
-4. Konfigurasi database di file .env
+```bash
+git clone https://github.com/agungbudisan/portal-berita.git
+cd portal-berita
+```
 
-5. Jalankan migrasi dan seeder
-   ```
-   php artisan migrate --seed
-   ```
+### 2. Install Dependensi
 
-6. Link storage untuk gambar
-   ```
-   php artisan storage:link
-   ```
+```bash
+composer install
+npm install
+```
 
-7. Kompilasi assets
-   ```
-   npm run dev
-   ```
+### 3. Setup Lingkungan
 
-8. Jalankan aplikasi
-   ```
-   php artisan serve
-   ```
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Penggunaan
+### 4. Konfigurasi Database
 
-### Akun Default
+Edit file `.env` dan sesuaikan konfigurasi database Anda:
 
-**Admin:**
-- Email: admin@winnicode.com
-- Password: password
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=portal_berita
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-**User:**
-- Email: ahmad@example.com
-- Password: password
+### 5. Jalankan Migrasi dan Seeder
 
-### Fetch Berita dari API
+```bash
+php artisan migrate --seed
+```
+
+### 6. Link Storage
+
+```bash
+php artisan storage:link
+```
+
+### 7. Kompilasi Assets
+
+```bash
+npm run dev
+```
+
+Untuk production:
+
+```bash
+npm run build
+```
+
+### 8. Jalankan Aplikasi
+
+```bash
+php artisan serve
+```
+
+Aplikasi akan dapat diakses di `http://localhost:8000`
+
+## 👥 Akun Default
+
+### Admin
+- **Email:** admin@winnicode.com
+- **Password:** password
+
+### User
+- **Email:** ahmad@example.com
+- **Password:** password
+
+> ⚠️ **Penting:** Ubah password default segera setelah instalasi untuk keperluan keamanan!
+
+## 📰 Fetch Berita dari API
+
+### Manual Fetch
 
 Jalankan perintah berikut untuk mengambil berita dari API:
 
-```
+```bash
 php artisan news:fetch
 ```
 
-Untuk menjadwalkan fetch otomatis setiap jam, pastikan cron job Laravel terpasang dengan benar:
+### Automatic Scheduling
+
+Untuk menjadwalkan fetch otomatis setiap jam, pastikan cron job Laravel terpasang dengan benar di server Anda:
+
+```bash
+* * * * * cd /path/to/portal-berita && php artisan schedule:run >> /dev/null 2>&1
+```
+
+## 📁 Struktur Project
 
 ```
-* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+portal-berita/
+├── app/
+│   ├── Models/              # Model database
+│   ├── Http/
+│   │   ├── Controllers/     # Controller aplikasi
+│   │   └── Requests/        # Form requests & validation
+│   ├── Repositories/        # Repository pattern untuk akses data
+│   └── Services/            # Service untuk logika bisnis
+├── database/
+│   ├── migrations/          # Migrasi database
+│   └── seeders/             # Seeder untuk data awal
+├── resources/
+│   ├── views/               # Template Blade
+│   ├── css/                 # CSS custom
+│   └── js/                  # JavaScript
+├── routes/                  # Route definisi
+├── config/                  # Konfigurasi aplikasi
+└── public/                  # File public (images, css, js)
 ```
 
-## Struktur Project
+## 🔌 API Integration
 
-- `app/Models` - Model database
-- `app/Http/Controllers` - Controller
-- `app/Repositories` - Repository pattern untuk akses data
-- `app/Services` - Service untuk logika bisnis
-- `database/migrations` - Migrasi database
-- `database/seeders` - Seeder untuk data awal
-- `resources/views` - Template view
+Aplikasi ini menggunakan API eksternal untuk fetch berita. Pastikan untuk mengkonfigurasi API key di file `.env`:
 
-<!-- ## Author
+```env
+NEWS_API_KEY=your_api_key_here
+NEWS_API_URL=https://newsapi.org/v2
+```
 
-PT. WINNICODE GARUDA TEKNOLOGI
-Alamat (Pusat): Bandung - Jl. Asia Afrika No.158, Kb. Pisang, Kec. Sumur Bandung, Kota Bandung, Jawa Barat 40261
-Alamat (Cabang): Bantul, Yogyakarta
-Call Center: 6285159932501 (24 Jam)
+## 💻 Tech Stack
 
-## License
+| Teknologi | Versi | Deskripsi |
+|-----------|-------|-----------|
+| Laravel | 12+ | Framework PHP |
+| Blade | 75.8% | Template engine |
+| PHP | 24% | Server-side language |
+| Bootstrap | 5 | CSS Framework |
+| MySQL | - | Database |
+| Node.js | - | JavaScript runtime |
 
-The MIT License (MIT) -->
+## 🔒 Keamanan
+
+- Input validation di semua form
+- CSRF protection dengan Laravel
+- Password hashing dengan bcrypt
+- Authorization checks di controllers
+- Rate limiting untuk API endpoints
+
+## 📝 License
+
+MIT License - lihat file LICENSE untuk detail lebih lanjut.
+
+## 🤝 Kontribusi
+
+Kontribusi sangat diterima! Silakan fork repository ini dan buat pull request untuk perubahan yang ingin Anda usulkan.
+
+## 📧 Kontak & Support
+
+Untuk pertanyaan atau support:
+- GitHub Issues: [Buka issue](https://github.com/agungbudisan/portal-berita/issues)
+- Email: agungbudisan@example.com
+
+## 📅 Changelog
+
+Lihat [CHANGELOG.md](CHANGELOG.md) untuk riwayat perubahan dan update.
+
+---
+
+**Terakhir diperbarui:** September 2, 2026
+
+Dibuat dengan ❤️ oleh [Agung Budisan](https://github.com/agungbudisan)
