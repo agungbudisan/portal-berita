@@ -178,18 +178,4 @@ MIT License - lihat file LICENSE untuk detail lebih lanjut.
 
 Kontribusi sangat diterima! Silakan fork repository ini dan buat pull request untuk perubahan yang ingin Anda usulkan.
 
-## 📧 Kontak & Support
-
-Untuk pertanyaan atau support:
-- GitHub Issues: [Buka issue](https://github.com/agungbudisan/portal-berita/issues)
-- Email: agungbudisan@example.com
-
-## 📅 Changelog
-
-Lihat [CHANGELOG.md](CHANGELOG.md) untuk riwayat perubahan dan update.
-
 ---
-
-**Terakhir diperbarui:** September 2, 2026
-
-Dibuat dengan ❤️ oleh [Agung Budisan](https://github.com/agungbudisan)
