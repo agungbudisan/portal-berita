@@ -2,8 +2,8 @@
 
 return [
 
-    'asset_url' => env('ASSET_URL', 'https://portal-berita-winninews.vercel.app'),
-    
+    'asset_url' => env('ASSET_URL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

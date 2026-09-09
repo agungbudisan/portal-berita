@@ -11,9 +11,9 @@
         <div class="hero-section">
             <div class="row">
                 <div class="col-md-5">
-                    <div class="rounded" style="height: 240px; background-image: url('{{ $featuredNews->image_url ? $featuredNews->image_url : asset('images/placeholder.jpg') }}'); background-size: cover; background-position: center;"></div>
+                    <div class="hero-image" style="background-image: url('{{ $featuredNews->image_url ? $featuredNews->image_url : asset('images/placeholder.jpg') }}');"></div>
                 </div>
-                <div class="col-md-7">
+                <div class="col-md-7 hero-copy">
                     <div class="category-badge">{{ $featuredNews->category->name }}</div>
                     <h3 class="mb-3">
                         <a href="{{ route('news.show', $featuredNews) }}" class="text-decoration-none text-dark">

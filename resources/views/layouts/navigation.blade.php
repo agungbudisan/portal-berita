@@ -1,4 +1,4 @@
-<header class="bg-white shadow-sm" x-bind:class="{ 'bg-dark': darkMode }">
+<header class="site-header bg-white shadow-sm" x-bind:class="{ 'bg-dark': darkMode }">
     <div class="container">
         <div class="row align-items-center py-3">
             <!-- Logo Column -->
