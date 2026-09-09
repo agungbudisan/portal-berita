@@ -7,7 +7,7 @@
     <!-- Main Content -->
     <div class="col-lg-8">
         <!-- Category Header -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="page-heading mb-4">
             <div class="d-flex align-items-center mb-2">
                 <div class="category-badge me-2">Kategori</div>
                 <nav aria-label="breadcrumb" class="ms-auto">

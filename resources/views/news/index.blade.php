@@ -109,7 +109,7 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Desktop Filter -->
-            <div class="card shadow-sm mb-4 d-none d-lg-block">
+            <div class="card filter-panel shadow-sm mb-4 d-none d-lg-block">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0"><i class="bi bi-funnel me-2"></i> Filter Berita</h5>
                 </div>

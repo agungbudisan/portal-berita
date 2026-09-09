@@ -16,7 +16,7 @@
         </nav>
 
         <!-- News Detail Card -->
-        <article class="bg-white rounded shadow-sm p-4 mb-4">
+        <article class="article-shell mb-4">
             <div class="d-flex align-items-center mb-3">
                 <div class="category-badge">{{ $news->category->name }}</div>
                 <div class="ms-auto">
@@ -110,7 +110,7 @@
         </article>
 
         <!-- Related News -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="content-panel related-panel mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Terkait</h5>
             <div class="row g-3">
                 @forelse($relatedNews as $related)
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Comment Section -->
-        <div class="bg-white rounded shadow-sm p-4">
+        <div class="content-panel comments-panel">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">
                 Komentar <span class="badge bg-primary rounded-pill ms-1">{{ $news->approvedComments->count() }}</span>
             </h5>

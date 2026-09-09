@@ -1,4 +1,4 @@
-<div class="card h-100 border-0 shadow-sm">
+<div class="card related-news-card h-100 border-0 shadow-sm">
     <div class="row g-0 h-100">
         <div class="col-4">
             <div class="h-100 position-relative" style="min-height: 80px;">

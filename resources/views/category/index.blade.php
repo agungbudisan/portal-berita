@@ -5,7 +5,11 @@
 @section('content')
 <div class="row">
     <div class="col-md-12">
-        <h2 class="mb-4">Semua Kategori</h2>
+        <div class="page-heading mb-4">
+            <div class="category-badge mb-2">Jelajahi</div>
+            <h2 class="mb-2">Semua Kategori</h2>
+            <p class="text-muted mb-0">Temukan sudut pandang dan berita yang paling relevan untuk Anda.</p>
+        </div>
 
         <!-- Trending Categories -->
         <div class="mb-5">
@@ -29,7 +33,7 @@
         </div>
 
         <!-- Alphabetical Categories Index -->
-        <div class="card border-0 shadow-sm">
+        <div class="content-panel">
             <div class="card-header bg-light">
                 <h4 class="mb-0">Indeks Kategori</h4>
             </div>

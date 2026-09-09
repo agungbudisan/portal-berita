@@ -66,6 +66,35 @@ main.container { max-width: 1240px; padding-top: 3rem !important; }
 .footer h5 { color: #fff; }
 .footer a, .footer address { color: #b8c1d2; }
 
+.page-heading, .search-heading, .article-shell, .content-panel {
+	background: var(--surface) !important;
+	border: 1px solid var(--line) !important;
+	border-radius: 16px !important;
+	box-shadow: var(--shadow) !important;
+}
+.page-heading { padding: 2rem !important; position: relative; overflow: hidden; }
+.page-heading::after { content: ''; position: absolute; right: -2rem; top: -3rem; width: 10rem; height: 10rem; border-radius: 50%; background: var(--mint); opacity: .65; }
+.page-heading > * { position: relative; z-index: 1; }
+.page-heading h1, .page-heading h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); }
+.search-heading { padding: 1.8rem !important; }
+.search-heading .search-icon { width: 3rem; height: 3rem; display: grid; place-items: center; border-radius: 12px; background: var(--mint); }
+.filter-panel { position: sticky; top: 1.5rem; }
+.filter-panel .card-header { background: var(--navy) !important; color: #fff !important; border: 0 !important; border-radius: 13px 13px 0 0 !important; }
+.article-shell { padding: clamp(1.25rem, 3vw, 2.75rem) !important; }
+.article-shell h1 { font-size: clamp(1.7rem, 4vw, 3.2rem); line-height: 1.08; }
+.article-shell figure img { width: 100%; max-height: 540px; object-fit: cover; border-radius: 14px !important; }
+.article-shell .news-content { font-size: 1.08rem; line-height: 1.85; color: var(--ink); }
+.article-shell .news-content p { margin-bottom: 1.25rem; }
+.related-panel, .comments-panel { padding: clamp(1.25rem, 3vw, 2rem) !important; }
+.related-panel .wgt-title, .comments-panel .wgt-title { display: block; }
+.related-panel .card { overflow: hidden; }
+.category-list-item a { color: var(--ink) !important; }
+.category-list-item a:hover { color: var(--coral) !important; }
+.dark .page-heading, .dark .search-heading, .dark .article-shell, .dark .content-panel { background: var(--surface) !important; }
+.dark .page-heading::after { background: #23483f; }
+
+@media (max-width: 991.98px) { .filter-panel { position: static; } }
+
 .dark { --paper: #101623; --surface: #182131; --ink: #edf1f7; --line: #2b3749; --muted-ink: #a8b2c2; }
 .dark body, body.dark { background: var(--paper) !important; color: var(--ink) !important; }
 .dark .site-header { background: rgba(24, 33, 49, .94) !important; }

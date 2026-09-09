@@ -7,7 +7,7 @@
     <!-- Main Content -->
     <div class="col-lg-8">
         <!-- Search Header -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="search-heading mb-4">
             <div class="d-flex align-items-center mb-3">
                 <div class="search-icon me-3">
                     <i class="bi bi-search text-primary" style="font-size: 2rem;"></i>
