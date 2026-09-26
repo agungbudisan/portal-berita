@@ -169,14 +169,14 @@ main.container { max-width: 1240px; padding-top: 3rem !important; }
 /* Home widgets use distinct editorial treatments instead of one repeated card style. */
 .home-widget { box-shadow: none !important; }
 .home-widget.search-widget {
-	background: var(--navy) !important;
-	border-color: var(--navy) !important;
-	color: #fff;
+	background: var(--surface) !important;
+	border-color: var(--line) !important;
+	color: var(--ink);
 	padding: 1.5rem !important;
 }
-.home-widget.search-widget .wgt-title { color: #fff !important; }
+.home-widget.search-widget .wgt-title { color: var(--ink) !important; }
 .home-widget.search-widget .wgt-title::before { background: var(--coral); }
-.home-widget.search-widget .form-control { border: 0 !important; background: #fff !important; }
+.home-widget.search-widget .form-control { border: 1px solid var(--line) !important; background: var(--surface) !important; border-radius: 9px !important; }
 .home-widget.search-widget .form-control::placeholder { color: #8994a7; }
 .home-widget.search-widget .btn-primary { background: var(--coral) !important; border-color: var(--coral) !important; }
 .home-widget.popular-widget { border-left: 4px solid var(--coral) !important; border-radius: 0 16px 16px 0 !important; padding: 1.5rem !important; }
@@ -199,11 +199,7 @@ main.container { max-width: 1240px; padding-top: 3rem !important; }
 .dark .home-widget.category-widget .list-group-item:hover { background: rgba(255,255,255,.08) !important; }
 
 body .home-widget.search-widget { background-color: var(--surface) !important; background-image: none !important; }
-body .home-widget.search-widget .wgt-title {
-	color: var(--ink) !important;
-	border: 0 !important;
-	padding-left: 0 !important;
-}
+body .home-widget.search-widget .wgt-title { color: var(--ink) !important; border: 0 !important; padding-left: 0 !important; }
 body .home-widget.search-widget .wgt-title::before { background: var(--coral) !important; }
 body .home-widget.search-widget .wgt-title::after { display: none; }
 .home-widget.popular-widget .wgt-title::after,
