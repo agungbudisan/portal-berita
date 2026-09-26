@@ -1,181 +1,164 @@
-# WinniNews - Portal Berita dengan Laravel
+# WinniNews
 
-Aplikasi portal berita modern yang terintegrasi dengan API Berita, dibangun dengan Laravel 12+ dan Bootstrap 5. Platform ini menyediakan pengalaman membaca berita yang responsif dengan fitur lengkap untuk admin dan user.
+WinniNews adalah portal berita berbasis Laravel 12 untuk membaca, mencari, dan mengelola berita dari beberapa sumber API. Aplikasi menyediakan halaman publik, autentikasi pengguna, bookmark, komentar, serta dashboard administrasi berbasis role.
 
-## 🚀 Fitur Utama
+## Fitur
 
-- ✨ Integrasi dengan API Berita eksternal untuk konten yang selalu terbaru
-- 📱 Portal berita responsif yang optimal di semua perangkat
-- 🔐 Dashboard Admin untuk manajemen konten berita
-- 👤 Dashboard User untuk bookmark, komentar, dan preferensi
-- 🔑 Sistem autentikasi multi-role (Admin, User)
-- 📅 Penjadwalan otomatis untuk fetch berita (Cron Jobs)
-- 💾 Repository pattern untuk clean code
-- 🎨 Desain modern dengan Bootstrap 5
+- Beranda dengan berita pilihan, terbaru, dan populer.
+- Daftar berita, detail berita, kategori, dan pencarian.
+- Integrasi News API dan GNews melalui sumber API yang dapat dikelola admin.
+- Pengambilan berita manual melalui command Artisan dan otomatis setiap jam melalui scheduler Laravel.
+- Autentikasi dengan role admin dan user.
+- Bookmark berita dan dashboard bookmark pengguna.
+- Komentar pengguna, pengeditan/penghapusan komentar sendiri, dan moderasi komentar oleh admin.
+- Dashboard admin untuk mengelola berita, kategori, pengguna, komentar, dan sumber API.
+- Upload gambar berita melalui Cloudinary.
+- Validasi input, proteksi CSRF, hashing password, dan sanitasi HTML menggunakan HTMLPurifier.
 
-## 📋 Persyaratan Sistem
+## Persyaratan
 
-- PHP 8.3 atau lebih tinggi
-- Composer
-- Node.js & npm
-- MySQL/MariaDB atau PostgreSQL
-- Laravel 12+
+- PHP 8.2 atau lebih baru.
+- Composer.
+- Node.js dan npm.
+- SQLite (konfigurasi default), MySQL/MariaDB, atau PostgreSQL.
+- API key dari News API dan/atau GNews jika ingin mengambil berita eksternal.
 
-## 🛠️ Instalasi
+## Instalasi Lokal
 
-### 1. Clone Repository
+1. Clone repository dan masuk ke direktori proyek:
 
-```bash
-git clone https://github.com/agungbudisan/portal-berita.git
-cd portal-berita
-```
+	```bash
+	git clone https://github.com/agungbudisan/portal-berita.git
+	cd portal-berita
+	```
 
-### 2. Install Dependensi
+2. Pasang dependensi PHP dan JavaScript:
 
-```bash
-composer install
-npm install
-```
+	```bash
+	composer install
+	npm install
+	```
 
-### 3. Setup Lingkungan
+3. Buat file lingkungan dan application key:
 
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+	```bash
+	cp .env.example .env
+	php artisan key:generate
+	```
 
-### 4. Konfigurasi Database
+	Pada Windows PowerShell, gunakan `Copy-Item .env.example .env` sebagai pengganti `cp`.
 
-Edit file `.env` dan sesuaikan konfigurasi database Anda:
+4. Konfigurasikan database di `.env`. Untuk SQLite, buat file database lalu gunakan:
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=portal_berita
-DB_USERNAME=root
-DB_PASSWORD=
-```
+	```env
+	DB_CONNECTION=sqlite
+	DB_DATABASE=C:/path/to/portal-berita/database/database.sqlite
+	```
 
-### 5. Jalankan Migrasi dan Seeder
+	Untuk MySQL, isi `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` sesuai server Anda.
 
-```bash
-php artisan migrate --seed
-```
+5. Isi kredensial sumber berita dan, bila diperlukan, Cloudinary:
 
-### 6. Link Storage
+	```env
+	NEWS_API_KEY=your_news_api_key
+	GNEWS_API_KEY=your_gnews_api_key
 
-```bash
-php artisan storage:link
-```
+	CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+	```
 
-### 7. Kompilasi Assets
+6. Jalankan migrasi dan data awal:
 
-```bash
-npm run dev
-```
+	```bash
+	php artisan migrate --seed
+	php artisan storage:link
+	```
 
-Untuk production:
+7. Jalankan aplikasi dan Vite dalam terminal terpisah:
 
-```bash
-npm run build
-```
+	```bash
+	php artisan serve
+	npm run dev
+	```
 
-### 8. Jalankan Aplikasi
+	Buka `http://localhost:8000` di browser. Untuk menjalankan server, queue listener, log viewer, dan Vite sekaligus, gunakan `composer run dev`.
 
-```bash
-php artisan serve
-```
+## Akun Seeder
 
-Aplikasi akan dapat diakses di `http://localhost:8000`
+Perintah `php artisan migrate --seed` membuat akun berikut untuk pengembangan lokal:
 
-## 👥 Akun Default
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@winnicode.com` | `password` |
+| User | `user@winninews.com` | `password` |
 
-### Admin
-- **Email:** admin@winnicode.com
-- **Password:** password
+Ganti password tersebut sebelum aplikasi digunakan di lingkungan bersama atau production.
 
-### User
-- **Email:** ahmad@example.com
-- **Password:** password
+## Fetch Berita
 
-> ⚠️ **Penting:** Ubah password default segera setelah instalasi untuk keperluan keamanan!
-
-## 📰 Fetch Berita dari API
-
-### Manual Fetch
-
-Jalankan perintah berikut untuk mengambil berita dari API:
+Fetch berita dari semua sumber API yang berstatus aktif dapat dijalankan secara manual:
 
 ```bash
 php artisan news:fetch
 ```
 
-### Automatic Scheduling
+Scheduler aplikasi menjalankan command tersebut setiap jam. Pada server Linux, daftarkan scheduler Laravel dengan cron:
 
-Untuk menjadwalkan fetch otomatis setiap jam, pastikan cron job Laravel terpasang dengan benar di server Anda:
-
-```bash
+```cron
 * * * * * cd /path/to/portal-berita && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-## 📁 Struktur Project
+Sumber API, URL, API key, dan status aktif/nonaktif dapat dikelola dari dashboard admin pada `/admin/api-sources`.
 
-```
-portal-berita/
-├── app/
-│   ├── Models/              # Model database
-│   ├── Http/
-│   │   ├── Controllers/     # Controller aplikasi
-│   │   └── Requests/        # Form requests & validation
-│   ├── Repositories/        # Repository pattern untuk akses data
-│   └── Services/            # Service untuk logika bisnis
-├── database/
-│   ├── migrations/          # Migrasi database
-│   └── seeders/             # Seeder untuk data awal
-├── resources/
-│   ├── views/               # Template Blade
-│   ├── css/                 # CSS custom
-│   └── js/                  # JavaScript
-├── routes/                  # Route definisi
-├── config/                  # Konfigurasi aplikasi
-└── public/                  # File public (images, css, js)
+## Command List
+
+```bash
+php artisan route:list       # Melihat seluruh route aplikasi
+php artisan migrate:fresh --seed
+php artisan test             # Menjalankan test Pest
+npm run build                # Build asset frontend sesuai konfigurasi proyek
 ```
 
-## 🔌 API Integration
+`migrate:fresh --seed` akan menghapus seluruh tabel dan data. Gunakan hanya pada lingkungan pengembangan atau pengujian.
 
-Aplikasi ini menggunakan API eksternal untuk fetch berita. Pastikan untuk mengkonfigurasi API key di file `.env`:
+## Struktur Utama
 
-```env
-NEWS_API_KEY=your_api_key_here
-NEWS_API_URL=https://newsapi.org/v2
+```text
+app/
+├── Console/Commands/       # Command Artisan, termasuk news:fetch
+├── Http/Controllers/       # Controller publik, user, dan admin
+├── Models/                 # Model Eloquent
+├── Repositories/           # Akses data berita dan kategori
+├── Services/               # Integrasi API berita
+└── Providers/              # Scheduler dan service provider
+database/
+├── migrations/             # Struktur tabel
+└── seeders/                # Data awal aplikasi
+resources/
+├── views/                  # Template Blade
+├── css/                    # Style aplikasi
+└── js/                     # JavaScript dan Alpine.js
+routes/                     # Route web, autentikasi, dan console
+public/                     # Entry point dan asset publik
 ```
 
-## 💻 Tech Stack
+## Tech Stack
 
-| Teknologi | Versi | Deskripsi |
-|-----------|-------|-----------|
-| Laravel | 12+ | Framework PHP |
-| Blade | 75.8% | Template engine |
-| PHP | 24% | Server-side language |
-| Bootstrap | 5 | CSS Framework |
-| MySQL | - | Database |
-| Node.js | - | JavaScript runtime |
+- Laravel 12 dan PHP 8.2+.
+- Blade, Bootstrap 5, Alpine.js, dan Vite.
+- SQLite, MySQL/MariaDB, atau PostgreSQL.
+- Laravel Sanctum, Laravel Breeze, Pest, dan PHPUnit.
+- News API, GNews, Cloudinary, Guzzle, dan HTMLPurifier.
 
-## 🔒 Keamanan
+## Pengujian
 
-- Input validation di semua form
-- CSRF protection dengan Laravel
-- Password hashing dengan bcrypt
-- Authorization checks di controllers
-- Rate limiting untuk API endpoints
+Jalankan test dengan:
 
-## 📝 License
+```bash
+php artisan test
+```
 
-MIT License - lihat file LICENSE untuk detail lebih lanjut.
+Pastikan konfigurasi database pengujian tersedia sebelum menjalankan test yang membutuhkan database.
 
-## 🤝 Kontribusi
+## Lisensi
 
-Kontribusi sangat diterima! Silakan fork repository ini dan buat pull request untuk perubahan yang ingin Anda usulkan.
-
----
+Proyek ini menggunakan lisensi MIT.
