@@ -29,8 +29,14 @@ class DashboardController extends Controller
             $commentCount = Comment::count();
             $todayNewsCount = $this->newsRepository->getTodayNewsCount();
 
-            // Batasi query untuk mengurangi beban
-            $apiSources = ApiSource::select(['id', 'name', 'url'])->get();
+            $apiSources = ApiSource::latest()->get([
+                'id',
+                'name',
+                'url',
+                'status',
+                'last_sync',
+                'news_count',
+            ]);
 
             // Gunakan eager loading yang lebih spesifik
             $recentComments = Comment::with([

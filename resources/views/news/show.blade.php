@@ -111,7 +111,7 @@
 
         <!-- Related News -->
         <div class="content-panel related-panel mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Terkait</h5>
+            <h5 class="wgt-title mb-3">Berita Terkait</h5>
             <div class="row g-3">
                 @forelse($relatedNews as $related)
                 <div class="col-md-6">
@@ -128,7 +128,7 @@
 
         <!-- Comment Section -->
         <div class="content-panel comments-panel">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">
+            <h5 class="wgt-title mb-3">
                 Komentar <span class="badge bg-primary rounded-pill ms-1">{{ $news->approvedComments->count() }}</span>
             </h5>
 
@@ -328,8 +328,8 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <!-- Popular News -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Populer</h5>
+        <div class="category-sidebar-panel detail-popular-panel bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title mb-3">Berita Populer</h5>
             <div class="list-group list-group-flush">
                 @foreach($popularNews as $index => $popular)
                 <a href="{{ $popular->source_url ? $popular->source_url : route('news.show', $popular) }}"
@@ -368,8 +368,8 @@
         </div>
 
         <!-- Categories -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori</h5>
+        <div class="category-sidebar-panel detail-category-panel bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title mb-3">Kategori</h5>
             <div class="list-group list-group-flush">
                 @foreach(\App\Models\Category::withCount(['news' => function($query) {
                     $query->where('status', 'published')->whereNotNull('published_at');
@@ -395,7 +395,7 @@
         </div>
 
         <!-- Newsletter -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="category-sidebar-panel newsletter-panel card border-0 shadow-sm mb-4">
             <div class="card-body bg-primary bg-opacity-10 rounded">
                 <h5 class="card-title fw-bold"><i class="bi bi-envelope-paper me-2"></i> Berlangganan Newsletter</h5>
                 <p class="card-text small">Dapatkan update berita terbaru langsung ke email Anda</p>
