@@ -91,8 +91,8 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <!-- Search -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Pencarian</h5>
+        <div class="home-widget search-widget bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title mb-3">Pencarian</h5>
             <div x-data="{ query: '' }">
                 <form action="{{ route('news.search') }}" method="GET" class="search-form">
                     <div class="input-group">
@@ -116,8 +116,8 @@
         </div>
 
         <!-- Popular News -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Berita Populer</h5>
+        <div class="home-widget popular-widget bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title mb-3">Berita Populer</h5>
             <div class="list-group list-group-flush">
                 @foreach($popularNews as $index => $popular)
                 <a href="{{ $popular->source_url ? $popular->source_url : route('news.show', $popular) }}"
@@ -156,8 +156,8 @@
         </div>
 
         <!-- Categories -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
-            <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori</h5>
+        <div class="home-widget category-widget bg-white rounded shadow-sm p-4 mb-4">
+            <h5 class="wgt-title mb-3">Kategori</h5>
             <div class="list-group list-group-flush">
                 @foreach(\App\Models\Category::withCount(['news' => function($query) {
                     $query->where('status', 'published')->whereNotNull('published_at');

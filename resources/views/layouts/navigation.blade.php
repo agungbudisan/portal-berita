@@ -38,7 +38,7 @@
 
                         <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
                             @php
-                                $otherCategories = \App\Models\Category::whereNotIn('id', $topCategories->pluck('id')->toArray())->take(10)->get();
+                                $otherCategories = \App\Models\Category::whereNotIn('id', $topCategories->pluck('id')->toArray())->take(5)->get();
                             @endphp
 
                             @foreach($otherCategories as $category)
@@ -55,7 +55,7 @@
 
                             <li>
                                 <a class="dropdown-item" href="{{ route('category.index') }}">
-                                    <i class="bi bi-grid-3x3-gap-fill me-1"></i> Lihat Semua Kategori
+                                    <i class="bi bi-grid-3x3-gap-fill me-1"></i> Buka Halaman Kategori
                                 </a>
                             </li>
                         </ul>
