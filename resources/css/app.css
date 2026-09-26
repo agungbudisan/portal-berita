@@ -129,6 +129,43 @@ main.container { max-width: 1240px; padding-top: 3rem !important; }
 .dark .site-header .nav .nav-link, .dark .site-header .nav .nav-link.active { color: var(--muted-ink) !important; }
 .dark .site-header .dropdown-item:hover { background-color: rgba(223, 241, 235, .12) !important; }
 
+/* Listing, search, and category panels */
+.listing-heading { padding: 1rem 0; }
+.listing-heading h1 { font-size: clamp(1.65rem, 3vw, 2.3rem); font-weight: 800; }
+.listing-panel, .search-sidebar-panel, .category-sidebar-panel {
+	background: var(--surface) !important;
+	border: 1px solid var(--line) !important;
+	border-radius: 16px !important;
+	box-shadow: var(--shadow) !important;
+	overflow: hidden;
+}
+.listing-panel .card-header, .listing-panel .card-body { background: var(--surface) !important; border-color: var(--line) !important; }
+.listing-panel .card-header { padding: 1.15rem 1.35rem !important; }
+.listing-panel .card-header h5, .search-sidebar-panel .wgt-title, .category-sidebar-panel .wgt-title { color: var(--ink) !important; }
+.listing-panel .card-header h5::before, .search-sidebar-panel .wgt-title::before, .category-sidebar-panel .wgt-title::before { content: ''; display: inline-block; width: 7px; height: 7px; margin: 0 .55rem .12rem 0; border-radius: 50%; background: var(--coral); }
+.listing-panel .form-control, .listing-panel .form-select, .search-sidebar-panel .form-control, .category-sidebar-panel .form-control { border-color: var(--line) !important; border-radius: 9px !important; color: var(--ink) !important; background: var(--surface) !important; }
+.listing-panel .form-control:focus, .listing-panel .form-select:focus, .search-sidebar-panel .form-control:focus, .category-sidebar-panel .form-control:focus { border-color: var(--coral) !important; box-shadow: 0 0 0 .18rem rgba(239, 107, 91, .14) !important; }
+.filter-summary { background: var(--mint) !important; border: 1px solid #c9e8df !important; color: var(--navy) !important; border-radius: 12px !important; }
+.filter-summary .badge { background: var(--navy) !important; color: #fff !important; }
+.newsletter-panel .card-body { background: var(--mint) !important; border-radius: 15px; }
+.newsletter-panel .card-title { color: var(--navy); }
+.newsletter-panel .card-text { color: #46645f; }
+.search-sidebar-panel, .category-sidebar-panel { padding: 1.5rem !important; }
+.search-sidebar-panel .wgt-title, .category-sidebar-panel .wgt-title { border: 0 !important; padding-left: 0 !important; display: block; }
+.search-sidebar-panel .wgt-title::after, .category-sidebar-panel .wgt-title::after { display: none; }
+.search-sidebar-panel .badge.bg-light, .search-sidebar-panel .tag-panel .badge.bg-light { background: var(--mint) !important; color: #27705f !important; }
+.search-sidebar-panel .btn-outline-primary { border-color: var(--navy) !important; color: var(--navy) !important; }
+.search-sidebar-panel .btn-outline-primary:hover { background: var(--navy) !important; color: #fff !important; }
+.popular-category-panel .list-group-item { background: transparent !important; border-bottom: 1px solid var(--line) !important; }
+.popular-category-panel .list-group-item:last-child { border-bottom: 0 !important; }
+.popular-category-panel .list-group-item:hover { background: rgba(223, 241, 235, .4) !important; }
+.popular-category-panel .badge, .other-category-panel .badge { background: var(--coral) !important; color: #fff !important; }
+.other-category-panel .card { border: 1px solid var(--line) !important; box-shadow: none !important; border-radius: 10px !important; }
+.other-category-panel .card:hover { border-color: var(--coral) !important; transform: translateY(-2px); }
+.dark .listing-panel, .dark .search-sidebar-panel, .dark .category-sidebar-panel { background: var(--surface) !important; }
+.dark .filter-summary { background: #1c3a38 !important; border-color: #28534d !important; color: #edf7f3 !important; }
+.dark .newsletter-panel .card-body { background: #1c3a38 !important; }
+
 /* Home widgets use distinct editorial treatments instead of one repeated card style. */
 .home-widget { box-shadow: none !important; }
 .home-widget.search-widget {

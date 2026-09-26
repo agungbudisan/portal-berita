@@ -15,7 +15,7 @@
             </nav>
 
             <!-- Page Title -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="listing-heading d-flex justify-content-between align-items-center mb-4">
                 <h1 class="fs-2 mb-0">
                     @if(request('category'))
                         {{ $categories->where('id', request('category'))->first()->name ?? 'Berita' }}
@@ -32,7 +32,7 @@
 
             <!-- Active Filters -->
             @if(request()->anyFilled(['category', 'date_from', 'date_to', 'sort']))
-            <div class="alert alert-light mb-4">
+            <div class="filter-summary alert alert-light mb-4">
                 <div class="d-flex align-items-center">
                     <div><i class="bi bi-funnel me-2"></i> Filter aktif:</div>
                     <div class="ms-3">
@@ -109,7 +109,7 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Desktop Filter -->
-            <div class="card filter-panel shadow-sm mb-4 d-none d-lg-block">
+            <div class="listing-panel card filter-panel shadow-sm mb-4 d-none d-lg-block">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0"><i class="bi bi-funnel me-2"></i> Filter Berita</h5>
                 </div>
@@ -234,7 +234,7 @@
             </div>
 
             <!-- Subscribe Card -->
-            <div class="card shadow-sm mb-4">
+            <div class="listing-panel newsletter-panel card shadow-sm mb-4">
                 <div class="card-body bg-primary bg-opacity-10 rounded">
                     <h5 class="card-title fw-bold"><i class="bi bi-envelope-paper me-2"></i> Berlangganan Newsletter</h5>
                     <p class="card-text small">Dapatkan update berita terbaru langsung ke email Anda</p>

@@ -83,7 +83,7 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <!-- Recent Searches (Dummy) -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="search-sidebar-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Pencarian Terbaru</h5>
             <div class="d-flex flex-wrap gap-2">
                 @php
@@ -101,7 +101,7 @@
         </div>
 
         <!-- Categories -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="search-sidebar-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori</h5>
             <div class="row g-2 mb-3">
                 @foreach(\App\Models\Category::withCount('news')->orderBy('news_count', 'desc')->take(6)->get() as $category)
@@ -123,7 +123,7 @@
         </div>
 
         <!-- Popular Tags (Dummy) -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="search-sidebar-panel tag-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Tag Populer</h5>
             <div class="d-flex flex-wrap gap-2">
                 @php

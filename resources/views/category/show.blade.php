@@ -88,7 +88,7 @@
     <!-- Sidebar -->
     <div class="col-lg-4">
         <!-- Search -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="category-sidebar-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Pencarian</h5>
             <div x-data="{ query: '' }">
                 <form action="{{ route('news.search') }}" method="GET">
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Popular News in Category -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="category-sidebar-panel popular-category-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Populer di {{ $category->name }}</h5>
             <div class="list-group list-group-flush">
                 @foreach($popularInCategory as $index => $newsItem)
@@ -143,7 +143,7 @@
         </div>
 
         <!-- Other Categories -->
-        <div class="bg-white rounded shadow-sm p-4 mb-4">
+        <div class="category-sidebar-panel other-category-panel bg-white rounded shadow-sm p-4 mb-4">
             <h5 class="wgt-title border-start border-3 border-primary ps-2 mb-3">Kategori Lainnya</h5>
             <div class="row g-2">
                 @foreach($otherCategories as $otherCategory)
@@ -166,7 +166,7 @@
         </div>
 
         <!-- Newsletter Widget -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="category-sidebar-panel newsletter-panel card border-0 shadow-sm mb-4">
             <div class="card-body bg-primary bg-opacity-10 rounded">
                 <h5 class="card-title fw-bold"><i class="bi bi-envelope-paper me-2"></i> Berlangganan Update</h5>
                 <p class="card-text small">Dapatkan berita terbaru dari kategori {{ $category->name }} langsung ke email Anda</p>
